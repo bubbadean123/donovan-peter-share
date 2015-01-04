@@ -24,18 +24,20 @@ begin
       end
     when /^file/
         filename = File.basename(client.gets)
-        filename =  "~/" + filename
+        filename =  "~/Desktop/" + filename
         filename = File.expand_path(filename)
-        file = File.open("w", filename)
+        file = File.open(filename, "w")
         file.close
+        puts "Created File"
      while data = client.gets
         next if data =~ /^file/
         break if data =~ /^EOF/
-        file = File.open("a", filename)
+        file = File.open(filename, "a")
         file.puts data
+        puts "Wrote Data"
       	file.close
+       	puts "Closed File"
       end
-	file.close
     else
       "Unsure how to handle header: #{header}"
     end
