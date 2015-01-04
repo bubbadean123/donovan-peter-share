@@ -23,7 +23,9 @@ begin
         puts data
       end
     when /^file/
-        filename = client.gets
+        filename = File.basename(client.gets)
+        filename =  "~/" + filename
+        filename = File.expand_path(filename)
         file = File.open("w", filename)
         file.close
      while data = client.gets
