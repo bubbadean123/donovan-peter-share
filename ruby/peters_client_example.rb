@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
 require 'socket'
-
-dest_server_address = "10.0.0.16"
-dest_server_port = 65533
+require "shellwords"
+dest_server_address = "10.0.0.2"
+dest_server_port = 65534
 
 begin
 
@@ -28,8 +28,11 @@ begin
       puts "Path:"
       path = gets.chomp
       path = File.expand_path(path)
+     path = Shellwords.escape(path)
       file = File.open(path, "r")
       lines = file.read.lines
+      file.close
+      lines.unshift(File.basename(path))
       lines.unshift("file")
       lines.push("EOF")
       lines.each do |line|

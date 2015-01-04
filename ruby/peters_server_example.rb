@@ -23,11 +23,17 @@ begin
         puts data
       end
     when /^file/
+        filename = client.gets
+        file = File.open("w", filename)
+        file.close
      while data = client.gets
         next if data =~ /^file/
         break if data =~ /^EOF/
-        puts data
-      end 
+        file = File.open("a", filename)
+        file.puts data
+      	file.close
+      end
+	file.close
     else
       "Unsure how to handle header: #{header}"
     end
