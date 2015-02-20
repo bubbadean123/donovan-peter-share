@@ -1,55 +1,7 @@
 require "FileUtils"
-$segc = 32
-$secc = 512
-$linc = 4096
+
 Dir.chdir("/Users/anneterpstra/Desktop/disks")
 def new_disk(name)
-Dir.chdir("/Users/anneterpstra/Desktop/disks")
-if Dir.exists?("/Users/anneterpstra/Desktop/ejected disks/" + name)
-puts "Disk exists but is ejected!"
-return NilClass
-end
-if Dir.exists?("/Users/anneterpstra/Desktop/disks/" + name)
-puts "Disk exists!"
-return NilClass
-end
-isegc = 0
-isecc = 0
-segi = 0
-seci = 0
-segc = 0
-secc = 0
-linc = 0
-Dir.mkdir(name)
-Dir.chdir(name)
-while segi < $segc
-Dir.mkdir("segment " + String(segi))
-segi += 1
-while isecc < $secc
-Dir.chdir("segment " + String(isegc))
-Dir.mkdir("sector " + String(isecc))
-Dir.chdir("..")
-isecc += 1
-end
-seci = 1
-isegc += 1
-end
-while segc < segi
-Dir.chdir("segment " + String(segc))
-segc += 1
-while secc < seci
-Dir.chdir("sector " + String(secc))
-while linc < $linc
-File.new("line " + String(linc), "w")
-linc += 1
-end
-secc += 1
-Dir.chdir("..")
-end
-Dir.chdir("..")
-segc += 1
-end
-Dir.chdir("/Users/anneterpstra/Desktop/disks")
 end
 def new_disk_entry(name, segment, sector, line, data)
 Dir.chdir("/Users/anneterpstra/Desktop/disks")
