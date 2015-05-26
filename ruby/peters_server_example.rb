@@ -23,7 +23,7 @@ begin
         puts data
       end
     when /^file/
-        filename = File.basename(client.gets)
+        filename = File.basename(client.gets.chomp)
         filename =  "~/Desktop/" + filename
         filename = File.expand_path(filename)
         file = File.open(filename, "w")
@@ -38,6 +38,9 @@ begin
       	file.close
        	puts "Closed File"
       end
+when /^test/
+client.puts true
+client.flush
     else
       "Unsure how to handle header: #{header}"
     end
