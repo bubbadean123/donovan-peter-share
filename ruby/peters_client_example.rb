@@ -4,16 +4,23 @@ require 'socket'
 require "shellwords"
 dest_server_address = "10.0.0.2"
 dest_server_port = 65534
-
-begin
-
+message = false
   loop do
+	begin
     connection = TCPSocket.new(dest_server_address, dest_server_port)
+rescue Errno::ECONNREFUSED
+if !message
+puts "Please connect server."
+message = true
+end
+next
+end
+message = false
     puts "Select data to send:"
     puts "1. Text"
     puts "2. File"
+    puts "3. Test"
     puts "Q/q Quit"
-
     input = gets.chomp
     case input
     when /1/
@@ -39,14 +46,25 @@ begin
       connection.puts line
       connection.flush
       end 
+      when /3/
+		data = "test\n"
+		connection.puts data
+		connection.flush
+		recived = connection.gets
+		sleep(0.2)
+		if recived                                                 
+		puts "Connected"
+		elsif !recived
+		puts "Failed"
+		else
+		puts "error"
+		end
       when /q/i
       puts "Quitting"
       connection.close
       break
     else
       puts "Don't know how to handle input #{input}"
-    end
-  end
-ensure
+end
   connection.close rescue nil
 end

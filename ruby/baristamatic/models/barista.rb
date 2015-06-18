@@ -17,6 +17,7 @@ class Barista
         @menu << Recipe.new(name, ingredients)
       end
       @menu.sort!{|a, b| a.name <=> b.name}
+puts @menu
     end
 
     def in_stock?(recipe)
