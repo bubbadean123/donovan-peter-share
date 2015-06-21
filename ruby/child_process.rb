@@ -1,5 +1,4 @@
-#!/usr/bin/env ruby
-
+ 
 puts "Child is now running!"
 running = true
 while running do
@@ -20,3 +19,4 @@ while running do
     STDERR.puts "Got unrecognized instruction: #{instruction}"
   end
 end
+

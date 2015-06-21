@@ -41,6 +41,7 @@ end
 end
 
 def insert(name)
+$name = name
 t = File.open("/Users/anneterpstra/Desktop/tapes/" + name, "r")
 $tape = Marshal.load(t)
 t.rewind()
@@ -49,10 +50,11 @@ end
 
 def eject()
 if $tape != nil
-t = File.open("/Users/anneterpstra/Desktop/tapes/" + name, "w")
+t = File.open("/Users/anneterpstra/Desktop/tapes/" + $name, "w")
 Marshal.dump($tape, t)
 t.rewind()
 t.close()
+$name = nil
 $tape = nil
 else
 return "No tape!"
@@ -74,6 +76,11 @@ if error == "No Tape!"
 puts "Error:"
 puts error
 end
+if error != "No Tape"
+name = $name
+eject()
+insert(name)
+name = nil
 end
 if op == "read"
 error = read()

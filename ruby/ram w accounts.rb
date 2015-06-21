@@ -1,4 +1,4 @@
-Dir.chdir("/Users/anneterpstra/Desktop/Peter's Folder/programing stuff/ruby/accounts")
+Dir.chdir("/Users/anneterpstra/Desktop/Peter's Folder/programming stuff/ruby/accounts")
 def new_hash(name)
 Dir.mkdir(name)
 end
@@ -25,13 +25,13 @@ name = gets.chomp
 print "Pass:"
 pass = gets.chomp
 new_hash(name)
-new_hash_entry("passwords",name,pass)
-new_hash_entry("login\ status", name, "no")
+new_hash_entry(name,"password",pass)
+new_hash_entry(name, "login status", "no")
 end
 if op == "write"
 print "Name:"
 name = gets.chomp
-if get_hash_entry("login\ status",name) == "yes"
+if get_hash_entry(name,"login status") == "yes"
 print "Adress:"
 adress = gets.chomp
 print "Data:"
@@ -44,7 +44,7 @@ end
 if op == "read"
 print "Name:"
 name = gets.chomp
-if get_hash_entry("login\ status",name) == "yes"
+if get_hash_entry(name,"login status") == "yes"
 print "Adress:"
 adress = gets.chomp
 data = get_hash_entry(name,adress)
@@ -61,8 +61,8 @@ print "Name:"
 name = gets.chomp
 print "Pass:"
 pass = gets.chomp
-if Integer(pass) == Integer(get_hash_entry("passwords",name))
-new_hash_entry("login\ status", name, "yes")
+if Integer(pass) == Integer(get_hash_entry(name,"password"))
+new_hash_entry(name, "login status", "yes")
 else
 puts "Invalid Password"
 end
@@ -70,6 +70,6 @@ end
 if op == "logout"
 print "Name:"
 name = gets.chomp
-new_hash_entry("login\ status", name, "no")
+new_hash_entry(name,"login status", "no")
 end
 end

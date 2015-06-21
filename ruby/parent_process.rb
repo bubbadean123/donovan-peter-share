@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 require "open3"
 
 puts "Started parent process"
@@ -10,7 +9,7 @@ child_process_location = File.join(current_directory, "./child_process.rb")
 # You can read more about Open3 here: http://ruby-doc.org/stdlib-2.2.2/libdoc/open3/rdoc/Open3.html#method-c-popen3
 # It basically runs the command provided and opens up pipes to the child's
 # standard input output and error as well as a thread that monitors the child process.
-Open3.popen3(child_process_location) do |input, output, error, thread|
+Open3.popen3("ruby",child_process_location) do |input, output, error, thread|
   pid = thread.pid
   puts "Started child process #{pid}"
 

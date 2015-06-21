@@ -4,10 +4,9 @@ dest_server_port = 65535
 connection = TCPSocket.new(dest_server_address, dest_server_port)
 while true
 data=gets.chomp
-if data == "send"
+connection.puts data
+if data == "end"
 connection.close
-connection = TCPSocket.new(dest_server_address, dest_server_port)
-else
-connection.print data
+break
 end
 end
