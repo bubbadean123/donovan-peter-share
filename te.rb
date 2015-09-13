@@ -19,10 +19,9 @@ doc[i]=input
 i=i+1
 end
 end
-i=0
-docfile=File.open(name,"w")
-while i < doc.length 
-docfile.puts doc[i]
-i=i+1
+puts doc
+docfile=File.open(File.expand_path(name),"w")
+doc.each do |line|
+docfile.puts line
 end
 docfile.close
