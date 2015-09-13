@@ -4,12 +4,15 @@ name=gets.chomp
 doc=[]
 input=""
 i=0
-while input!="s" 
+while input!="s"
+  print "#{i}: "
 input=gets.chomp
 case input
-when "e" 
+when "e"
+  print "Lineno: "
 line=gets.chomp
 line=Integer(line)
+print "#{line}: "
 input=gets.chomp
 doc[line]=input
 when "s"
