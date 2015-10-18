@@ -1,6 +1,3 @@
-require 'tempfile'
-require 'fileutils'
-
 $tape=nil
 
 def tape_read(char)
@@ -23,30 +20,33 @@ end
 #   $tape.puts(tcont)
 # end
 
-def tape_write(char,data)
+def tape_write(char,data,content=[])
   $tape.rewind
-#How do we fix this?
-  current_content_array = $tape.read.split("\n")
-  new_file = Tempfile.new("temp")
-  if current_content_array[char].nil?
-    current_content_array << data
+  #How do we fix this?
+  if content.empty?
+    current_content_array = $tape.read.split("\n")
   else
-    current_content_array[char] = data
+    current_content_array = content
   end
+  $tape.rewind
+  puts "Current content in tape: #{current_content_array}"
+  current_content_array[char] = data
+  puts "Setting pos #{char} to #{data}, altered array: #{current_content_array}"
+  current_content_array.compact!
   current_content_array.each do |character|
-    new_file.puts(character)
+    puts "Writing #{character} to file"
+    $tape.puts(character)
   end
-  new_file.close
-  old_path = $tape.path
-  FileUtils.mv(new_file.path, old_path)
 end
 
 def tape_insert(name)
+  current_content = []
   if File.exists?(name+".tap")
-    $tape = File.open(name+".tap","a+")
-  else
-    $tape = File.open(name+".tap","w+")
+    current_content = File.read(name+".tap").split("\n")
   end
+
+  $tape = File.open(name+".tap","w+")
+  return current_content
 end
 
 def tape_eject()
@@ -55,13 +55,13 @@ def tape_eject()
 end
 
 i=0
-tape_insert("test")
-tape_write(i,"a")
+content = tape_insert("test")
+tape_write(i,"a",content)
 i=1
-tape_write(i,"~")
+tape_write(i,"~",content)
 tape_eject()
-tape_insert("test")
-tape_write(i,"t")
+content = tape_insert("test")
+tape_write(i,"t",content)
 i=2
-tape_write(i,"~")
+tape_write(i,"~",content)
 tape_eject
