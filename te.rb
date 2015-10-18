@@ -5,11 +5,11 @@ doc=[]
 input=""
 i=0
 while input!="s"
-  print "#{i}: "
+print "#{i}: "
 input=gets.chomp
 case input
 when "e"
-  print "Lineno: "
+print "Lineno: "
 line=gets.chomp
 line=Integer(line)
 print "#{line}: "
