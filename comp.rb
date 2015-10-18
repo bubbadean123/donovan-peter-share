@@ -24,6 +24,7 @@ end
 # end
 
 def tape_write(char,data)
+  $tape.rewind
   current_content_array = $tape.read.split("\n")
   new_file = Tempfile.new("temp")
   if current_content_array[char].nil?
