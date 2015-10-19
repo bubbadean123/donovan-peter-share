@@ -5,21 +5,6 @@ def tape_read(char)
   return $tape.read.split("\n")[char]
 end
 
-# def tape_write(char,data)
-#   tcont=$tape.read.split("\n")
-#   puts tcont.inspect
-#   if tcont[char]==nil
-#     tcont.unshift(data)
-#   else
-#     tcont[char]=data
-#   end
-#   puts tcont.inspect
-#   tcont=tcont.join("\n")
-#   puts "About to write string #{tcont}"
-#   $tape.rewind
-#   $tape.puts(tcont)
-# end
-
 def tape_write(char,data,content=[])
   $tape.rewind
   #How do we fix this?
@@ -29,12 +14,9 @@ def tape_write(char,data,content=[])
     current_content_array = content
   end
   $tape.rewind
-  puts "Current content in tape: #{current_content_array}"
   current_content_array[char] = data
-  puts "Setting pos #{char} to #{data}, altered array: #{current_content_array}"
   current_content_array.compact!
   current_content_array.each do |character|
-    puts "Writing #{character} to file"
     $tape.puts(character)
   end
 end
