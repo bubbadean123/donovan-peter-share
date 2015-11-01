@@ -5,27 +5,30 @@ def tape_read(char)
   return $tape.read.split("\n")[char]
 end
 
-def tape_write(char,data)
-  tcont=$tape.read.split("\n")
-  puts tcont.inspect
-  if tcont[char]==nil
-    tcont.unshift(data)
-  else
-    tcont[char]=data
-  end
-  puts tcont.inspect
-  tcont=tcont.join("\n")
-  puts "About to write string #{tcont}"
+def tape_write(char,data,content=[])
   $tape.rewind
-  $tape.puts(tcont)
+  #How do we fix this?
+  if content.empty?
+    current_content_array = $tape.read.split("\n")
+  else
+    current_content_array = content
+  end
+  $tape.rewind
+  current_content_array[char] = data
+  current_content_array.compact!
+  current_content_array.each do |character|
+    $tape.puts(character)
+  end
 end
 
 def tape_insert(name)
+  current_content = []
   if File.exists?(name+".tap")
-    $tape = File.open(name+".tap","a+")
-  else
-    $tape = File.open(name+".tap","w+")
+    current_content = File.read(name+".tap").split("\n")
   end
+
+  $tape = File.open(name+".tap","w+")
+  return current_content
 end
 
 def tape_eject()
@@ -34,13 +37,13 @@ def tape_eject()
 end
 
 i=0
-tape_insert("test")
-tape_write(i,"a")
+content = tape_insert("test")
+tape_write(i,"a",content)
 i=1
-tape_write(i,"~")
+tape_write(i,"~",content)
 tape_eject()
-tape_insert("test")
-tape_write(i,"t")
+content = tape_insert("test")
+tape_write(i,"t",content)
 i=2
-tape_write(i,"~")
+tape_write(i,"~",content)
 tape_eject
