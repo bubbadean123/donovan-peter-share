@@ -22,7 +22,6 @@ doc[i]=input
 i=i+1
 end
 end
-puts doc
 docfile=File.open(File.expand_path(name),"w")
 doc.each do |line|
 docfile.puts line

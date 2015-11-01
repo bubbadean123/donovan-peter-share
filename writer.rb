@@ -1,5 +1,4 @@
-input=""
-while input!="s"
+while true
 puts"Op:w/nd/r/s"
 op=gets.chomp
 case op
@@ -9,7 +8,7 @@ deck=gets.chomp
 cardnum=File.read(File.expand_path("./"+deck+"/cardnum.txt"))
 cardnum=Integer(cardnum)
 cardnum=cardnum+1
-file=File.open(File.expand_path("./"+deck+"/cardnum.txt"))
+file=File.open(File.expand_path("./"+deck+"/cardnum.txt"),"w")
 file.puts cardnum
 file.close
 while true
@@ -20,6 +19,7 @@ end
 card=File.open(File.expand_path("./"+deck+"/CARD"+String(cardnum)+".txt"),"w")
 card.puts input
 card.close
+break
 end
 when "nd"
 puts"Deck:"
@@ -34,8 +34,8 @@ puts "Deck:"
 deck=gets.chomp
 puts"Number:"
 num=gets.chomp
-puts File.read(File.expand_path("./"+deck+"/CARD"+Integer(num)+".txt"))
+puts File.read(File.expand_path("./"+deck+"/CARD"+num+".txt"))
 when "s"
-next
+exit
 end
 end
