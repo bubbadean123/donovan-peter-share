@@ -2,7 +2,7 @@ class Tape
   #reading endc:class.endc
   #writing endc:class.endc=data
 
-  attr_accesor :endc
+  attr_accessor :endc
 
   def initialize(end_char="~")
     @tape=""
@@ -37,33 +37,35 @@ class Tape
     if File.exists?(name+".tap")
       @cont = File.read(name+".tap").split("\n")
     end
-    @name=name
+    @name=name+".tap"
     @tape = File.open(name+".tap","w+")
     return
   end
 
   def eject()
-    @tape.rewind
-    puts @tape.read()
-    @tape.close()
+    @tape.rewind()
     tapec=@tape.read.split("\n")
+    @tape.close()
     if tapec.include?(@endc) and tapec.last!=@endc
       tapec.delete(@endc)
       tapec << @endc
-      tape=File.open(@name,"w")
+      tape=File.open(@name,"w+")
       tapec.each do |character|
         tape.puts(character)
       end
       tape.rewind()
       tape.close()
     elsif tapec.last != @endc
-      tape=File.open(@name,"w")
+      tapec << @endc
+      tape=File.open(@name,"w+")
       tapec.each do |character|
         tape.puts(character)
       end
       tape.rewind()
+	tape.rewind()
       tape.close()
     end
+	puts File.read(@name)
     @tape=nil
     @cont=[]
   end
@@ -71,4 +73,15 @@ end
 
 tape=Tape.new
 tape.insert("data")
-tape.write("w")
+puts "----"
+tape.write(0,"w")
+tape.eject()
+tape.insert("data")
+puts "----"
+tape.write(2,"test")
+tape.eject()
+tape.insert("data")
+puts "----"
+puts tape.read(0)
+puts tape.read(1)
+puts tape.read(2)
