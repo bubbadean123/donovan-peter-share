@@ -7,14 +7,17 @@ class Tape
   def initialize(end_char="~")
     @tape=""
     @endc=end_char
+	@cont=[]
+	@name=""
   end
 
-  def tape_read(char)
+  def read(char)
     @tape.rewind()
     return @tape.read.split("\n")[char]
   end
 
-  def tape_write(char,data,content=[])
+  def write(char,data)
+	content=@cont
     @tape.rewind
     #How do we fix this?
     if content.empty?
@@ -30,20 +33,33 @@ class Tape
     end
   end
 
-  def tape_insert(name)
-    current_content = []
+  def insert(name)
     if File.exists?(name+".tap")
-      current_content = File.read(name+".tap").split("\n")
+      @cont = File.read(name+".tap").split("\n")
     end
+	@name=name
     @tape = File.open(name+".tap","w+")
-    return current_content
+    return
   end
 
-  def tape_eject()
+  def eject()
+	@tape.rewind
+	puts @tape.read()
     @tape.close()
+	tapec=@tape.read.split("\n")
+	if tapec.include?(@endc) and tapec.last!=@endc
+	tapec.delete(@endc)
+	end
+	if tapec.last != @endc
+	tape=File.open(@name,"a")
+	tape.puts(@endc)
+	tape.rewind()
+	tape.close()
+   end
     @tape=nil
-  end
-
-
+	@cont=[]
 end
-
+end
+tape=Tape.new
+tape.insert("data")
+tape.write("w")
