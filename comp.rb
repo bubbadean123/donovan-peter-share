@@ -12,8 +12,10 @@ class Tape
   end
 
   def read(char)
-    @tape.rewind()
-    return @tape.read.split("\n")[char]
+    #@tape.rewind()
+    #return @tape.read.split("\n")[char]
+	@cont[char]
+	
   end
 
   def write(char,data)
@@ -29,8 +31,13 @@ class Tape
     current_content_array[char] = data
     current_content_array.compact!
     current_content_array.each do |character|
-      @tape.puts(character)
+      if character == @endc
+	  next
+	  else
+	  @tape.puts(character)
+ 	  end
     end
+@tape.puts(@endc)
   end
 
   def insert(name)
@@ -75,12 +82,8 @@ tape=Tape.new
 tape.insert("data")
 puts "----"
 tape.write(0,"w")
-tape.eject()
-tape.insert("data")
 puts "----"
 tape.write(2,"test")
-tape.eject()
-tape.insert("data")
 puts "----"
 puts tape.read(0)
 puts tape.read(1)
