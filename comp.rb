@@ -12,13 +12,13 @@ class Tape
   end
 
   def read(char)
-    #@tape.rewind()
-    #return @tape.read.split("\n")[char]
 	@cont[char]
-	
   end
 
   def write(char,data)
+if @tape.closed?
+insert(@name)
+end
     content=@cont
     @tape.rewind
     #How do we fix this?
@@ -29,22 +29,26 @@ class Tape
     end
     @tape.rewind
     current_content_array[char] = data
-    current_content_array.compact!
+	@cont=[]
     current_content_array.each do |character|
+	  character=character.to_s
       if character == @endc
 	  next
 	  else
 	  @tape.puts(character)
+	  @cont.push(character)
  	  end
     end
 @tape.puts(@endc)
+@cont.push(@endc)
+@tape.close
   end
 
   def insert(name)
     if File.exists?(name+".tap")
       @cont = File.read(name+".tap").split("\n")
     end
-    @name=name+".tap"
+    @name=name
     @tape = File.open(name+".tap","w+")
     return
   end
@@ -88,3 +92,4 @@ puts "----"
 puts tape.read(0)
 puts tape.read(1)
 puts tape.read(2)
+puts tape.read(3)
