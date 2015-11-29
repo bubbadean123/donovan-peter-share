@@ -1,4 +1,4 @@
-Dir.chdir("/Users/anneterpstra/Desktop/Peter's Folder/programming stuff/ruby/accounts")
+Dir.chdir("/Users/anneterpstra/Desktop/Peter's Folder/programming stuff/accounts")
 def new_hash(name)
 Dir.mkdir(name)
 end

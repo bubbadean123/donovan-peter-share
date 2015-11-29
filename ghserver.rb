@@ -1,4 +1,4 @@
-ghdata_path="/Users/anneterpstra/Desktop/Program_stuff/ghserverdata"
+ghdata_path="/Users/anneterpstra/Desktop/Peter's Folder/programming stuff/ghserverdata"
 require "socket"
 class TCPSocket
 def close

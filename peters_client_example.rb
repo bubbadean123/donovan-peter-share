@@ -56,8 +56,6 @@ message = false
 		puts "Connected"
 		elsif !recived
 		puts "Failed"
-		else
-		puts "error"
 		end
       when /q/i
       puts "Quitting"

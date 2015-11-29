@@ -1,7 +1,7 @@
 def new(name)
 tape = {}
 tape["intadress"] = 0
-t = File.open("/Users/anneterpstra/Desktop/tapes/" + name, "w")
+t = File.open("/Users/anneterpstra/Desktop/Peter's Folder/programming stuff/tapes/" + name, "w")
 Marshal.dump(tape, t)
 t.rewind()
 t.close()
@@ -42,7 +42,7 @@ end
 
 def insert(name)
 $name = name
-t = File.open("/Users/anneterpstra/Desktop/tapes/" + name, "r")
+t = File.open("/Users/anneterpstra/Desktop/Peter's Folder/programming stuff/tapes/" + name, "r")
 $tape = Marshal.load(t)
 t.rewind()
 t.close() 
@@ -50,7 +50,7 @@ end
 
 def eject()
 if $tape != nil
-t = File.open("/Users/anneterpstra/Desktop/tapes/" + $name, "w")
+t = File.open("/Users/anneterpstra/Desktop/Peter's Folder/programming stuff/tapes/" + $name, "w")
 Marshal.dump($tape, t)
 t.rewind()
 t.close()
@@ -78,9 +78,8 @@ puts error
 end
 if error != "No Tape"
 name = $name
-eject()
-insert(name)
 name = nil
+end
 end
 if op == "read"
 error = read()
