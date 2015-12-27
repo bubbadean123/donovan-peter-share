@@ -1,4 +1,5 @@
 puts"Welcome to Ruby Text Editor v1.0"
+puts "New/Open(n/o)"
 puts "Name:"
 name=gets.chomp
 doc=[]
@@ -22,7 +23,6 @@ doc[i]=input
 i=i+1
 end
 end
-docfile=File.open(File.expand_path(name),"w")
 doc.each do |line|
 docfile.puts line
 end

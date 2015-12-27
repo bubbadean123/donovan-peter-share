@@ -16,67 +16,32 @@ class Tape
   end
 
   def write(char,data)
-if @tape.closed?
-insert(@name)
-end
-    content=@cont
-    @tape.rewind
-    #How do we fix this?
-    if content.empty?
-      current_content_array = @tape.read.split("\n")
-    else
-      current_content_array = content
-    end
-    @tape.rewind
-    current_content_array[char] = data
-	@cont=[]
-    current_content_array.each do |character|
-	  character=character.to_s
-      if character == @endc
-	  next
-	  else
-	  @tape.puts(character)
-	  @cont.push(character)
- 	  end
-    end
-@tape.puts(@endc)
-@cont.push(@endc)
-@tape.close
+      cont = @cont
+      cont.delete(@endc)
+	  cont[char]=data
+	  cont<<@endc
+      @tape.rewind
+      @tape.puts cont
   end
 
   def insert(name)
     if File.exists?(name+".tap")
-      @cont = File.read(name+".tap").split("\n")
-    end
-    @name=name
+      cont = File.read(name+".tap")
+      @cont = cont.split("\n")
+      @cont.delete(@endc)
+      @tape = File.open(name+".tap","w+")
+      @tape.puts cont
+      @tape.rewind
+      @name=name
+    else
     @tape = File.open(name+".tap","w+")
-    return
+	@name=name
+	end
   end
 
   def eject()
     @tape.rewind()
-    tapec=@tape.read.split("\n")
     @tape.close()
-    if tapec.include?(@endc) and tapec.last!=@endc
-      tapec.delete(@endc)
-      tapec << @endc
-      tape=File.open(@name,"w+")
-      tapec.each do |character|
-        tape.puts(character)
-      end
-      tape.rewind()
-      tape.close()
-    elsif tapec.last != @endc
-      tapec << @endc
-      tape=File.open(@name,"w+")
-      tapec.each do |character|
-        tape.puts(character)
-      end
-      tape.rewind()
-	tape.rewind()
-      tape.close()
-    end
-	puts File.read(@name)
     @tape=nil
     @cont=[]
   end
@@ -84,12 +49,9 @@ end
 
 tape=Tape.new
 tape.insert("data")
-puts "----"
-tape.write(0,"w")
-puts "----"
-tape.write(2,"test")
-puts "----"
+tape.write(0,1)
+tape.write(2,3)
 puts tape.read(0)
 puts tape.read(1)
 puts tape.read(2)
-puts tape.read(3)
+tape.eject()
