@@ -1,3 +1,5 @@
+# Taken from: http://www.lukaszielinski.de/blog/posts/2013/07/04/the-rsa-algorithm-in-ruby/
+
 class Integer
   # This method to check for primes is not 100% reliable, but almost.
   # Advantage: speed
