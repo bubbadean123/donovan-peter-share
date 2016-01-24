@@ -84,7 +84,7 @@ class TK16
 		else
 			@a = @ram[address]
 		end
-end
+	end
 	
 	def ram_to_b(address)
 		if @ram[address] == nil
@@ -93,42 +93,42 @@ end
 		else
 			@b = @ram[address]
 		end
-end
+	end
 	
 	def r_to_ram(adress)
 		@ram[adress] = @r
-end
+	end
 	
 	def imload_a(value)
 		@a = value
-end
+	end
 	
 	def imload_b(value)
 		@b = value
-end
+	end
 	
 	def r_to_p(arg)
 		@p = @r
-end
+	end
 	
 	def add(arg)
 		@r = @a + @b
-end
+	end
 
 	def sub(arg)
 		@r = @a - @b
-end
+	end
 	
 	def mult(arg)
 		@r = @a * @b
-end
+	end
 	def div(arg)
 		@r = @a / @b
-end
+	end
 	
 	def a_to_r(arg)
 		@r = @a
-end
+	end
 	
 	def b_to_r(arg)
 		@r = @b
@@ -187,10 +187,10 @@ tk16.prog[4] = (24<<16) + 0 #JUMP 0
 i = 0
 while i < runs * 4
 	tk16.execute_next
-i += 1
-if i == runs * 4
-res = tk16.ram[1]
-puts "Res:"
-puts res
-end
+	i += 1
+	if i == runs * 4
+		res = tk16.ram[1]
+		puts "Res:"
+		puts res
+	end
 end

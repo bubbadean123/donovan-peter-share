@@ -29,7 +29,7 @@ class Tape
       cont = File.read(name+".tap")
       @cont = cont.split("\n")
       @cont.delete(@endc)
-      @tape = File.open(name+".tap","w+")
+      @tape = File.open("./tapes/"+name+".tap","w+")
       @tape.puts cont
       @tape.rewind
       @name=name
