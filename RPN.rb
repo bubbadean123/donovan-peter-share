@@ -23,7 +23,7 @@ def equ()
 	puts $stack[-1]
 end
 while true
-	puts "Num/Op:"
+  puts "Num/Op:"
 	inp = gets.chomp
 	case inp
 	when /[1-9]/
