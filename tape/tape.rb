@@ -10,7 +10,7 @@ class Tape
   end
 
   def read(char)
-	@cont[char]
+	return @cont[char]
   end
 
   def write(char,data)
@@ -23,9 +23,6 @@ class Tape
   end
   
   def write_to_file()
-    if !Dir.exists?("tapes")
-	  Dir.mkdir("tapes")
-    end
    f = File.open(@name+".tap","w")
    @cont.each do |val|
       f.puts val
