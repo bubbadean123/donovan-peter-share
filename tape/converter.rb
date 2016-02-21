@@ -5,3 +5,4 @@ puts "Name:"
 name=gets.chomp
 drive.insert(name)
 contents=drive.read()
+puts contents
