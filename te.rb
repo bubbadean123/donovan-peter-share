@@ -1,10 +1,10 @@
 puts"Welcome to Ruby Text Editor v1.0"
-puts "New/Open(n/o)"
 puts "Name:"
 name=gets.chomp
 doc=[]
 input=""
 i=0
+docfile=File.open(name,"w")
 while input!="s"
 	print "#{i}: "
 	input=gets.chomp

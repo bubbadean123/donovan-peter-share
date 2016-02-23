@@ -49,35 +49,8 @@ class TapeDrive
   end
 end
 
-op = nil
-drive = TapeDrive.new()
 
-while op != "s" or op != "S"
-  puts "Op:"
-  op = gets.chomp
-  case op
-    when "i"
-      puts "Name:"
-      name = gets.chomp
-      drive.insert(name)
-    when "e"
-      drive.eject()
-    when "w"
-      puts "Data:"
-      data = gets.chomp
-      puts "Start:"
-      start = gets.chomp.to_i
-      drive.write(data,start)
-      puts "Location:"
-      puts "#{start}-#{start+data.length-1}"
-    when "r"
-      puts "Start:"
-      start = gets.chomp.to_i
-      puts "End:"
-      end_pos = gets.chomp.to_i
-      puts drive.read(start,end_pos)
-   end   
-end
+
    
   
     
