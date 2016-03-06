@@ -1,5 +1,18 @@
 #! /usr/bin/env ruby
-require "/Users/anneterpstra/Desktop/Peter's Folder/programming stuff/tape/tapedrive"
+require "tapedrive"
+if ARGV[0] == "-h" or ARGV[0] == "--help"
+  puts "Interface program for tapedrive"
+  puts "List of operations:"
+  puts "Case sensitive!"
+  puts "i:"
+  puts "Insert a new tape. Takes a tape name."
+  puts "e:"
+  puts "Ejects the current tape."
+  puts "w:"
+  puts "Write to the tape. Takes a string and a starting postion. Returns the location of the string."
+  puts "r:"
+  puts "Read from the tape. Takes a starting position and an ending position."
+end
 op = ""
 drive = TapeDrive.new()
 

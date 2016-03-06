@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
     s.summary = "Tapedrive gem"
     s.description = "Tapedrive gem"
     s.authors = ["Donovan Lampa","Peter Terpstra"]
-    s.files = ["tape.rb","tapedrive.rb","converter.rb"]
+    s.files = ["lib/tapedrive/tape.rb","lib/tapedrive.rb"]
     s.executables << "interface"
+  s.add_runtime_dependency "yard"
 end
-    
