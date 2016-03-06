@@ -6,5 +6,5 @@ Gem::Specification.new do |s|
     s.authors = ["Donovan Lampa","Peter Terpstra"]
     s.files = ["lib/tapedrive/tape.rb","lib/tapedrive.rb"]
     s.executables << "interface"
-  s.add_runtime_dependency "yard"
+    s.add_runtime_dependency "yard"
 end
