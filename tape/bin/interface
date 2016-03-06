@@ -12,6 +12,7 @@ if ARGV[0] == "-h" or ARGV[0] == "--help"
   puts "Write to the tape. Takes a string and a starting postion. Returns the location of the string."
   puts "r:"
   puts "Read from the tape. Takes a starting position and an ending position."
+  exit
 end
 op = ""
 drive = TapeDrive.new()
