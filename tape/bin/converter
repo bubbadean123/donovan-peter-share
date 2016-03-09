@@ -1,3 +1,4 @@
+#! /usr/bin/env ruby
 require "./tapedrive"
 
 drive=TapeDrive.new

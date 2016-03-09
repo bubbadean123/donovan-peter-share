@@ -2,14 +2,14 @@
 # Defines a tape object
 # Used for low level storing and reading of data off of .tap files
 class Tape
-
+  attr_reader :name
   # Initalizes a new tape object.
   # @param [String] name Name for the tape or .tap file
   def initialize(name)
     @cont=[]
     @name=name
-    if File.exists?(name+".tap")
-      cont = File.read(name+".tap")
+    if File.exists?("./"+name+".tap")
+      cont = File.read("./"+name+".tap")
       @cont = cont.split("\n")
 	end
   end
@@ -37,7 +37,7 @@ class Tape
   #Method to update .tap file
   # @return [void]
   def write_to_file()
-   f = File.open(@name+".tap","w")
+   f = File.open("./"+@name+".tap","w")
    @cont.each do |val|
       f.puts val
    end

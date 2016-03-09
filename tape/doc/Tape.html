@@ -102,11 +102,8 @@
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
 
-<p>Core for tapedrive gem</p>
-
-<p>Defines a tape object</p>
-
-<p>Used for low level storing and reading of data off of .tap files</p>
+<p>Core for tapedrive gem Defines a tape object Used for low level storing and
+reading of data off of .tap files</p>
 
 
   </div>
@@ -117,6 +114,40 @@
 </div>
 
 
+
+  <h2>Instance Attribute Summary <small>(<a href="#" class="summary_toggle">collapse</a>)</small></h2>
+  <ul class="summary">
+
+      <li class="public ">
+  <span class="summary_signature">
+
+      <a href="#name-instance_method" title="#name (instance method)">- (Object) <strong>name</strong> </a>
+
+
+
+  </span>
+
+
+
+
+      <span class="note title readonly">readonly</span>
+
+
+
+
+
+
+
+
+
+    <span class="summary_desc"><div class='inline'>
+<p>Returns the value of attribute name.</p>
+</div></span>
+
+</li>
+
+
+  </ul>
 
 
 
@@ -294,8 +325,8 @@
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
   <span class='ivar'>@cont</span><span class='op'>=</span><span class='lbracket'>[</span><span class='rbracket'>]</span>
   <span class='ivar'>@name</span><span class='op'>=</span><span class='id identifier rubyid_name'>name</span>
-  <span class='kw'>if</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exists?'>exists?</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='op'>+</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>.tap</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_cont'>cont</span> <span class='op'>=</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='op'>+</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>.tap</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+  <span class='kw'>if</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exists?'>exists?</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>./</span><span class='tstring_end'>&quot;</span></span><span class='op'>+</span><span class='id identifier rubyid_name'>name</span><span class='op'>+</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>.tap</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_cont'>cont</span> <span class='op'>=</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>./</span><span class='tstring_end'>&quot;</span></span><span class='op'>+</span><span class='id identifier rubyid_name'>name</span><span class='op'>+</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>.tap</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
     <span class='ivar'>@cont</span> <span class='op'>=</span> <span class='id identifier rubyid_cont'>cont</span><span class='period'>.</span><span class='id identifier rubyid_split'>split</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>\n</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
 	<span class='kw'>end</span>
 <span class='kw'>end</span></pre>
@@ -305,6 +336,54 @@
 </div>
 
 </div>
+
+  <div id="instance_attr_details" class="attr_details">
+    <h2>Instance Attribute Details</h2>
+
+
+      <span id=""></span>
+      <div class="method_details first">
+  <h3 class="signature first" id="name-instance_method">
+
+    - (<tt>Object</tt>) <strong>name</strong>  <span class="extras">(readonly)</span>
+
+
+
+
+
+</h3><div class="docstring">
+  <div class="discussion">
+
+<p>Returns the value of attribute name</p>
+
+
+  </div>
+</div>
+<div class="tags">
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+5
+6
+7</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 5</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_name'>name</span>
+  <span class='ivar'>@name</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+
+  </div>
 
 
   <div id="instance_method_details" class="method_details_list">
@@ -516,7 +595,7 @@
       <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 39</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_write_to_file'>write_to_file</span><span class='lparen'>(</span><span class='rparen'>)</span>
- <span class='id identifier rubyid_f'>f</span> <span class='op'>=</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span><span class='lparen'>(</span><span class='ivar'>@name</span><span class='op'>+</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>.tap</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>w</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+ <span class='id identifier rubyid_f'>f</span> <span class='op'>=</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>./</span><span class='tstring_end'>&quot;</span></span><span class='op'>+</span><span class='ivar'>@name</span><span class='op'>+</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>.tap</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>w</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
  <span class='ivar'>@cont</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_val'>val</span><span class='op'>|</span>
     <span class='id identifier rubyid_f'>f</span><span class='period'>.</span><span class='id identifier rubyid_puts'>puts</span> <span class='id identifier rubyid_val'>val</span>
  <span class='kw'>end</span>
@@ -533,7 +612,7 @@
 </div>
 
     <div id="footer">
-  Generated on Sun Mar  6 13:55:38 2016 by
+  Generated on Wed Mar  9 17:57:28 2016 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.1.0).
 </div>

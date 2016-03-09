@@ -23,7 +23,7 @@ class TapeDrive
     if @tape == nil
       @tape = Tape.new(name)
     else
-      print "Tape #{@tape.name} already in,  eject first"
+      puts "Tape #{@tape.name} already in,  eject first"
     end
   end
 
