@@ -17,7 +17,7 @@ class TapeDrive
   end
 
   # Insert a new tape
-  # @param [String] name Name of tape to insert
+  # @param name [String] Name of tape to insert
   # @return [void]
   def insert(name)
     if @tape == nil
@@ -28,8 +28,8 @@ class TapeDrive
   end
 
   # Write a string on to the tape.
-  # @param [String] data String to write
-  # @param [Integer] start Start location for writing.
+  # @param data [String] String to write
+  # @param start [Integer] Start location for writing.
   # @return [void]
   def write(data,start=0)
     start=start
@@ -40,8 +40,8 @@ class TapeDrive
   end
 
   # Read a string on the tape
-  # @param [Integer] start Start positiion for reading.
-  # @param [Integer] end_pos End position for reading.
+  # @param start [Integer] Start positiion for reading.
+  # @param end_pos [Integer] End position for reading.
   # @return [String] The data read from the tape
    def read(start=0,end_pos=nil)
      start=start

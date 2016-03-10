@@ -4,7 +4,7 @@
 class Tape
   attr_reader :name
   # Initalizes a new tape object.
-  # @param [String] name Name for the tape or .tap file
+  # @param name [String] Name for the tape or .tap file
   def initialize(name)
     @cont=[]
     @name=name
@@ -15,15 +15,15 @@ class Tape
   end
 
   # Reads one character from the tape
-  # @param [Integer] char Location of character to get
+  # @param char [Integer] Location of character to get
   # @return [String]  The character read from tape
   def read(char)
 	return @cont[char]
   end
 
   # Writes a character at a specific location
-  # @param [Integer] char Location of character to set
-  # @param [String] data Character to write
+  # @param char [Integer] Location of character to set
+  # @param data [String] Character to write
   # @return [void]
   def write(char,data)
       cont = @cont
