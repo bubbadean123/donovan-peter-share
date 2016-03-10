@@ -3,6 +3,8 @@
 # Used for low level storing and reading of data off of .tap files
 class Tape
   attr_reader :name
+  # @!attribute [r] name
+  #   @return [String] The name of the tape
   # Initalizes a new tape object.
   # @param name [String] Name for the tape or .tap file
   def initialize(name)
