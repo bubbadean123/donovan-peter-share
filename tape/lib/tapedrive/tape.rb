@@ -6,6 +6,7 @@ class Tape
   # @!attribute [r] name
   #   @return [String] The name of the tape
   # Initalizes a new tape object.
+  #@!method initalize(name)
   # @param name [String] Name for the tape or .tap file
   def initialize(name)
     @cont=[]
@@ -15,17 +16,18 @@ class Tape
       @cont = cont.split("\n")
 	end
   end
-
-  # Reads one character from the tape
-  # @param char [Integer] Location of character to get
-  # @return [String]  The character read from tape
+  #Read a character from a specific location.
+  # @!method read(char)
+  #   @param char [Integer] Location of character to get
+  #   @return [String]  The character read from tape
   def read(char)
 	return @cont[char]
   end
 
   # Writes a character at a specific location
-  # @param char [Integer] Location of character to set
-  # @param data [String] Character to write
+  # @!method quit(username, message = "Quit")
+  #   @param char [Integer] Location of character to set
+  #   @param data [String] Character to write
   # @return [void]
   def write(char,data)
       cont = @cont
@@ -37,7 +39,8 @@ class Tape
   end
 
   #Method to update .tap file
-  # @return [void]
+  # @!method write_to_file()
+  #   @return [void]
   def write_to_file()
    f = File.open("./"+@name+".tap","w")
    @cont.each do |val|

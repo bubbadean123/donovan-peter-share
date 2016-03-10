@@ -128,7 +128,7 @@
         <li class="public ">
   <span class="summary_signature">
 
-      <a href="#eject-instance_method" title="#eject (instance method)">- (void) <strong>eject</strong> </a>
+      <a href="#eject-instance_method" title="#eject (instance method)">- (Object) <strong>eject</strong> </a>
 
 
 
@@ -144,6 +144,31 @@
 
     <span class="summary_desc"><div class='inline'>
 <p>Ejects the current tape.</p>
+</div></span>
+
+</li>
+
+
+        <li class="public ">
+  <span class="summary_signature">
+
+      <a href="#flush-instance_method" title="#flush (instance method)">- (Object) <strong>flush</strong> </a>
+
+
+
+  </span>
+
+
+
+
+
+
+
+
+
+    <span class="summary_desc"><div class='inline'>
+<p>Flush any unsaved changes to disk(It should do this in write() or eject()
+but if it does not, this will.).</p>
 </div></span>
 
 </li>
@@ -178,7 +203,7 @@
         <li class="public ">
   <span class="summary_signature">
 
-      <a href="#insert-instance_method" title="#insert (instance method)">- (void) <strong>insert</strong>(name) </a>
+      <a href="#insert-instance_method" title="#insert (instance method)">- (Object) <strong>insert</strong>(name) </a>
 
 
 
@@ -202,7 +227,7 @@
         <li class="public ">
   <span class="summary_signature">
 
-      <a href="#read-instance_method" title="#read (instance method)">- (String) <strong>read</strong>(start = 0, end_pos = nil) </a>
+      <a href="#read-instance_method" title="#read (instance method)">- (Object) <strong>read</strong>(start = 0, end_pos-nil) </a>
 
 
 
@@ -217,7 +242,7 @@
 
 
     <span class="summary_desc"><div class='inline'>
-<p>Read a string on the tape.</p>
+<p>Read a string on the tape  @return [String] The data read from the tape.</p>
 </div></span>
 
 </li>
@@ -226,7 +251,7 @@
         <li class="public ">
   <span class="summary_signature">
 
-      <a href="#write-instance_method" title="#write (instance method)">- (void) <strong>write</strong>(data, start = 0) </a>
+      <a href="#write-instance_method" title="#write (instance method)">- (Object) <strong>write</strong>(data, start = 0) </a>
 
 
 
@@ -279,12 +304,12 @@
       <pre class="lines">
 
 
-6
 7
-8</pre>
+8
+9</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 6</span>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 7</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='rparen'>)</span>
   <span class='ivar'>@tape</span><span class='op'>=</span><span class='kw'>nil</span>
@@ -304,7 +329,7 @@
       <div class="method_details first">
   <h3 class="signature first" id="eject-instance_method">
 
-    - (<tt>void</tt>) <strong>eject</strong>
+    - (<tt>Object</tt>) <strong>eject</strong>
 
 
 
@@ -312,7 +337,7 @@
 
 </h3><div class="docstring">
   <div class="discussion">
-    <p class="note returns_void">This method returns an undefined value.</p>
+
 <p>Ejects the current tape</p>
 
 
@@ -327,21 +352,57 @@
       <pre class="lines">
 
 
-12
-13
-14
-15
-16
-17</pre>
+7
+8
+9</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 12</span>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 7</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_eject'>eject</span><span class='lparen'>(</span><span class='rparen'>)</span>
- <span class='kw'>unless</span> <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
-   <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_write_to_file'>write_to_file</span><span class='lparen'>(</span><span class='rparen'>)</span>
-   <span class='ivar'>@tape</span> <span class='op'>=</span> <span class='kw'>nil</span>
-  <span class='kw'>end</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='rparen'>)</span>
+  <span class='ivar'>@tape</span><span class='op'>=</span><span class='kw'>nil</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+
+      <div class="method_details ">
+  <h3 class="signature " id="flush-instance_method">
+
+    - (<tt>Object</tt>) <strong>flush</strong>
+
+
+
+
+
+</h3><div class="docstring">
+  <div class="discussion">
+
+<p>Flush any unsaved changes to disk(It should do this in write() or eject()
+but if it does not, this will.)</p>
+
+
+  </div>
+</div>
+<div class="tags">
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+77
+78
+79</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 77</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_flush'>flush</span><span class='lparen'>(</span><span class='rparen'>)</span>
+  <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_write_to_file'>write_to_file</span><span class='lparen'>(</span><span class='rparen'>)</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -351,7 +412,7 @@
       <div class="method_details ">
   <h3 class="signature " id="insert-instance_method">
 
-    - (<tt>void</tt>) <strong>insert</strong>(name)
+    - (<tt>Object</tt>) <strong>insert</strong>(name)
 
 
 
@@ -359,33 +420,13 @@
 
 </h3><div class="docstring">
   <div class="discussion">
-    <p class="note returns_void">This method returns an undefined value.</p>
+
 <p>Insert a new tape</p>
 
 
   </div>
 </div>
 <div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
-
-    <li>
-
-        <span class='name'>name</span>
-
-
-        <span class='type'>(<tt>String</tt>)</span>
-
-
-
-        &mdash;
-        <div class='inline'>
-<p>Name of tape to insert</p>
-</div>
-
-    </li>
-
-</ul>
 
 
 </div><table class="source_code">
@@ -394,23 +435,23 @@
       <pre class="lines">
 
 
-22
-23
-24
 25
 26
 27
-28</pre>
+28
+29
+30
+31</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 22</span>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 25</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_insert'>insert</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
-  <span class='kw'>if</span> <span class='ivar'>@tape</span> <span class='op'>==</span> <span class='kw'>nil</span>
-    <span class='ivar'>@tape</span> <span class='op'>=</span> <span class='const'>Tape</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
-  <span class='kw'>else</span>
-    <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Tape </span><span class='embexpr_beg'>#{</span><span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> already in,  eject first</span><span class='tstring_end'>&quot;</span></span>
-  <span class='kw'>end</span>
+  <span class='kw'>if</span> <span class='ivar'>@tape</span> <span class='op'>==</span> <span class='kw'>nil</span><span class='comment'>#make sure thre is no tape already in so we do not overwrite the tape.
+</span>    <span class='ivar'>@tape</span> <span class='op'>=</span> <span class='const'>Tape</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span><span class='comment'>#set the tape variable to a new tape.
+</span>  <span class='kw'>else</span>
+    <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Tape </span><span class='embexpr_beg'>#{</span><span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> already in,  eject first</span><span class='tstring_end'>&quot;</span></span><span class='comment'>#if a tape is already in, give a message to the user.
+</span>  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -420,7 +461,7 @@
       <div class="method_details ">
   <h3 class="signature " id="read-instance_method">
 
-    - (<tt>String</tt>) <strong>read</strong>(start = 0, end_pos = nil)
+    - (<tt>Object</tt>) <strong>read</strong>(start = 0, end_pos-nil)
 
 
 
@@ -431,69 +472,13 @@
 
 <p>Read a string on the tape</p>
 
+<pre class="code ruby"><code class="ruby">@return [String] The data read from the tape</code></pre>
+
 
   </div>
 </div>
 <div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
 
-    <li>
-
-        <span class='name'>start</span>
-
-
-        <span class='type'>(<tt>Integer</tt>)</span>
-
-
-        <em class="default">(defaults to: <tt>0</tt>)</em>
-
-
-        &mdash;
-        <div class='inline'>
-<p>Start positiion for reading.</p>
-</div>
-
-    </li>
-
-    <li>
-
-        <span class='name'>end_pos</span>
-
-
-        <span class='type'>(<tt>Integer</tt>)</span>
-
-
-        <em class="default">(defaults to: <tt>nil</tt>)</em>
-
-
-        &mdash;
-        <div class='inline'>
-<p>End position for reading.</p>
-</div>
-
-    </li>
-
-</ul>
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-
-    <li>
-
-
-        <span class='type'>(<tt>String</tt>)</span>
-
-
-
-        &mdash;
-        <div class='inline'>
-<p>The data read from the tape</p>
-</div>
-
-    </li>
-
-</ul>
 
 </div><table class="source_code">
   <tr>
@@ -501,11 +486,6 @@
       <pre class="lines">
 
 
-46
-47
-48
-49
-50
 51
 52
 53
@@ -522,33 +502,38 @@
 64
 65
 66
-67</pre>
+67
+68
+69
+70
+71
+72</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 46</span>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 51</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_start'>start</span><span class='op'>=</span><span class='int'>0</span><span class='comma'>,</span><span class='id identifier rubyid_end_pos'>end_pos</span><span class='op'>=</span><span class='kw'>nil</span><span class='rparen'>)</span>
    <span class='id identifier rubyid_start'>start</span><span class='op'>=</span><span class='id identifier rubyid_start'>start</span>
    <span class='id identifier rubyid_end_pos'>end_pos</span> <span class='op'>=</span> <span class='id identifier rubyid_end_pos'>end_pos</span>
-   <span class='id identifier rubyid_string'>string</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span>
-   <span class='kw'>unless</span> <span class='id identifier rubyid_end_pos'>end_pos</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
-     <span class='id identifier rubyid_range'>range</span> <span class='op'>=</span> <span class='id identifier rubyid_start'>start</span><span class='op'>..</span><span class='id identifier rubyid_end_pos'>end_pos</span>
-     <span class='id identifier rubyid_range'>range</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_val'>val</span><span class='op'>|</span>
-       <span class='id identifier rubyid_string'>string</span> <span class='op'>+=</span> <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span>
-     <span class='kw'>end</span>
-   <span class='kw'>else</span>
-     <span class='kw'>while</span> <span class='kw'>true</span>
-     <span class='id identifier rubyid_char'>char</span> <span class='op'>=</span> <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_start'>start</span><span class='rparen'>)</span>
-     <span class='kw'>if</span> <span class='id identifier rubyid_char'>char</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>~</span><span class='tstring_end'>&quot;</span></span>
-       <span class='kw'>break</span>
+   <span class='id identifier rubyid_string'>string</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span><span class='comment'>#We have not read any characters yet, so set this to a blank string.
+</span>   <span class='kw'>unless</span> <span class='id identifier rubyid_end_pos'>end_pos</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='comment'>#If the end position does not equal nil read a chunk, otherwise read the whole tape.
+</span>     <span class='id identifier rubyid_range'>range</span> <span class='op'>=</span> <span class='id identifier rubyid_start'>start</span><span class='op'>..</span><span class='id identifier rubyid_end_pos'>end_pos</span><span class='comment'>#set the range to read.
+</span>     <span class='id identifier rubyid_range'>range</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_val'>val</span><span class='op'>|</span><span class='comment'>#begin the each.
+</span>       <span class='id identifier rubyid_string'>string</span> <span class='op'>+=</span> <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span><span class='comment'>#read in the next character.
+</span>     <span class='kw'>end</span>
+   <span class='kw'>else</span><span class='comment'>#read the whole tape
+</span>     <span class='kw'>while</span> <span class='kw'>true</span>
+       <span class='id identifier rubyid_char'>char</span> <span class='op'>=</span> <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_start'>start</span><span class='rparen'>)</span><span class='comment'>#read the next char
+</span>       <span class='kw'>if</span> <span class='id identifier rubyid_char'>char</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>~</span><span class='tstring_end'>&quot;</span></span><span class='comment'>#If the character equals the end character, end the read.
+</span>       <span class='kw'>break</span>
      <span class='kw'>else</span>
-       <span class='id identifier rubyid_string'>string</span> <span class='op'>+=</span> <span class='id identifier rubyid_char'>char</span>
-    <span class='kw'>end</span>
-    <span class='id identifier rubyid_start'>start</span> <span class='op'>+=</span> <span class='int'>1</span>
-    <span class='kw'>end</span>
+         <span class='id identifier rubyid_string'>string</span> <span class='op'>+=</span> <span class='id identifier rubyid_char'>char</span><span class='comment'>#otherwise add it to the string
+</span>    <span class='kw'>end</span>
+       <span class='id identifier rubyid_start'>start</span> <span class='op'>+=</span> <span class='int'>1</span><span class='comment'>#increment start so we can read in the next character
+</span>    <span class='kw'>end</span>
   <span class='kw'>end</span>
-  <span class='kw'>return</span> <span class='id identifier rubyid_string'>string</span>
-<span class='kw'>end</span></pre>
+   <span class='kw'>return</span> <span class='id identifier rubyid_string'>string</span><span class='comment'>#return the string
+</span><span class='kw'>end</span></pre>
     </td>
   </tr>
 </table>
@@ -557,7 +542,7 @@
       <div class="method_details ">
   <h3 class="signature " id="write-instance_method">
 
-    - (<tt>void</tt>) <strong>write</strong>(data, start = 0)
+    - (<tt>Object</tt>) <strong>write</strong>(data, start = 0)
 
 
 
@@ -565,51 +550,13 @@
 
 </h3><div class="docstring">
   <div class="discussion">
-    <p class="note returns_void">This method returns an undefined value.</p>
+
 <p>Write a string on to the tape.</p>
 
 
   </div>
 </div>
 <div class="tags">
-  <p class="tag_title">Parameters:</p>
-<ul class="param">
-
-    <li>
-
-        <span class='name'>data</span>
-
-
-        <span class='type'>(<tt>String</tt>)</span>
-
-
-
-        &mdash;
-        <div class='inline'>
-<p>String to write</p>
-</div>
-
-    </li>
-
-    <li>
-
-        <span class='name'>start</span>
-
-
-        <span class='type'>(<tt>Integer</tt>)</span>
-
-
-        <em class="default">(defaults to: <tt>0</tt>)</em>
-
-
-        &mdash;
-        <div class='inline'>
-<p>Start location for writing.</p>
-</div>
-
-    </li>
-
-</ul>
 
 
 </div><table class="source_code">
@@ -618,22 +565,22 @@
       <pre class="lines">
 
 
-34
-35
-36
-37
 38
 39
-40</pre>
+40
+41
+42
+43
+44</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 34</span>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 38</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span><span class='id identifier rubyid_start'>start</span><span class='op'>=</span><span class='int'>0</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_start'>start</span><span class='op'>=</span><span class='id identifier rubyid_start'>start</span>
-  <span class='id identifier rubyid_data'>data</span><span class='period'>.</span><span class='id identifier rubyid_each_char'>each_char</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_val'>val</span><span class='op'>|</span>
-    <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span><span class='id identifier rubyid_start'>start</span><span class='comma'>,</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span>
-    <span class='id identifier rubyid_start'>start</span> <span class='op'>+=</span> <span class='int'>1</span>
+  <span class='id identifier rubyid_data'>data</span><span class='period'>.</span><span class='id identifier rubyid_each_char'>each_char</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_val'>val</span><span class='op'>|</span><span class='comment'>#Start the each loop
+</span>    <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span><span class='id identifier rubyid_start'>start</span><span class='comma'>,</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span><span class='comment'>#write the next character of the string.
+</span>    <span class='id identifier rubyid_start'>start</span> <span class='op'>+=</span> <span class='int'>1</span>
    <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -646,7 +593,7 @@
 </div>
 
     <div id="footer">
-  Generated on Wed Mar  9 18:17:03 2016 by
+  Generated on Thu Mar 10 09:02:48 2016 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.1.0).
 </div>

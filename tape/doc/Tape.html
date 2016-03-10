@@ -163,6 +163,30 @@ reading of data off of .tap files</p>
         <li class="public ">
   <span class="summary_signature">
 
+      <a href="#initalize-instance_method" title="#initalize (instance method)">- (Object) <strong>initalize</strong>(name) </a>
+
+
+
+  </span>
+
+
+
+
+
+
+
+
+
+    <span class="summary_desc"><div class='inline'>
+<p>Initalizes a new tape object.</p>
+</div></span>
+
+</li>
+
+
+        <li class="public ">
+  <span class="summary_signature">
+
       <a href="#initialize-instance_method" title="#initialize (instance method)">- (Tape) <strong>initialize</strong>(name) </a>
 
 
@@ -189,7 +213,29 @@ reading of data off of .tap files</p>
         <li class="public ">
   <span class="summary_signature">
 
-      <a href="#read-instance_method" title="#read (instance method)">- (String) <strong>read</strong>(char) </a>
+      <a href="#quit-instance_method" title="#quit (instance method)">- (Object) <strong>quit</strong>(username, message = &quot;Quit&quot;) </a>
+
+
+
+  </span>
+
+
+
+
+
+
+
+
+
+    <span class="summary_desc"><div class='inline'></div></span>
+
+</li>
+
+
+        <li class="public ">
+  <span class="summary_signature">
+
+      <a href="#read-instance_method" title="#read (instance method)">- (Object) <strong>read</strong>(char) </a>
 
 
 
@@ -204,7 +250,7 @@ reading of data off of .tap files</p>
 
 
     <span class="summary_desc"><div class='inline'>
-<p>Reads one character from the tape.</p>
+<p>Read a character from a specific location.</p>
 </div></span>
 
 </li>
@@ -237,7 +283,7 @@ reading of data off of .tap files</p>
         <li class="public ">
   <span class="summary_signature">
 
-      <a href="#write_to_file-instance_method" title="#write_to_file (instance method)">- (void) <strong>write_to_file</strong> </a>
+      <a href="#write_to_file-instance_method" title="#write_to_file (instance method)">- (Object) <strong>write_to_file</strong> </a>
 
 
 
@@ -310,17 +356,17 @@ reading of data off of .tap files</p>
       <pre class="lines">
 
 
-10
 11
 12
 13
 14
 15
 16
-17</pre>
+17
+18</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 10</span>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 11</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
   <span class='ivar'>@cont</span><span class='op'>=</span><span class='lbracket'>[</span><span class='rbracket'>]</span>
@@ -386,12 +432,12 @@ reading of data off of .tap files</p>
       <pre class="lines">
 
 
-10
 11
-12</pre>
+12
+13</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 10</span>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 11</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_name'>name</span>
   <span class='ivar'>@name</span>
@@ -409,9 +455,9 @@ reading of data off of .tap files</p>
 
 
       <div class="method_details first">
-  <h3 class="signature first" id="read-instance_method">
+  <h3 class="signature first" id="initalize-instance_method">
 
-    - (<tt>String</tt>) <strong>read</strong>(char)
+    - (<tt>Object</tt>) <strong>initalize</strong>(name)
 
 
 
@@ -420,7 +466,7 @@ reading of data off of .tap files</p>
 </h3><div class="docstring">
   <div class="discussion">
 
-<p>Reads one character from the tape</p>
+<p>Initalizes a new tape object.</p>
 
 
   </div>
@@ -431,26 +477,7 @@ reading of data off of .tap files</p>
 
     <li>
 
-        <span class='name'>char</span>
-
-
-        <span class='type'>(<tt>Integer</tt>)</span>
-
-
-
-        &mdash;
-        <div class='inline'>
-<p>Location of character to get</p>
-</div>
-
-    </li>
-
-</ul>
-
-<p class="tag_title">Returns:</p>
-<ul class="return">
-
-    <li>
+        <span class='name'>name</span>
 
 
         <span class='type'>(<tt>String</tt>)</span>
@@ -459,12 +486,13 @@ reading of data off of .tap files</p>
 
         &mdash;
         <div class='inline'>
-<p>The character read from tape</p>
+<p>Name for the tape or .tap file</p>
 </div>
 
     </li>
 
 </ul>
+
 
 </div><table class="source_code">
   <tr>
@@ -472,15 +500,25 @@ reading of data off of .tap files</p>
       <pre class="lines">
 
 
-22
-23
-24</pre>
+11
+12
+13
+14
+15
+16
+17
+18</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 22</span>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 11</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_char'>char</span><span class='rparen'>)</span>
-	<span class='kw'>return</span> <span class='ivar'>@cont</span><span class='lbracket'>[</span><span class='id identifier rubyid_char'>char</span><span class='rbracket'>]</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
+  <span class='ivar'>@cont</span><span class='op'>=</span><span class='lbracket'>[</span><span class='rbracket'>]</span>
+  <span class='ivar'>@name</span><span class='op'>=</span><span class='id identifier rubyid_name'>name</span>
+  <span class='kw'>if</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_exists?'>exists?</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>./</span><span class='tstring_end'>&quot;</span></span><span class='op'>+</span><span class='id identifier rubyid_name'>name</span><span class='op'>+</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>.tap</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_cont'>cont</span> <span class='op'>=</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>./</span><span class='tstring_end'>&quot;</span></span><span class='op'>+</span><span class='id identifier rubyid_name'>name</span><span class='op'>+</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>.tap</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+    <span class='ivar'>@cont</span> <span class='op'>=</span> <span class='id identifier rubyid_cont'>cont</span><span class='period'>.</span><span class='id identifier rubyid_split'>split</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>\n</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+	<span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -488,9 +526,9 @@ reading of data off of .tap files</p>
 </div>
 
       <div class="method_details ">
-  <h3 class="signature " id="write-instance_method">
+  <h3 class="signature " id="quit-instance_method">
 
-    - (<tt>void</tt>) <strong>write</strong>(char, data)
+    - (<tt>Object</tt>) <strong>quit</strong>(username, message = &quot;Quit&quot;)
 
 
 
@@ -498,8 +536,6 @@ reading of data off of .tap files</p>
 
 </h3><div class="docstring">
   <div class="discussion">
-    <p class="note returns_void">This method returns an undefined value.</p>
-<p>Writes a character at a specific location</p>
 
 
   </div>
@@ -549,17 +585,109 @@ reading of data off of .tap files</p>
       <pre class="lines">
 
 
-30
-31
 32
 33
 34
 35
 36
-37</pre>
+37
+38
+39</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 30</span>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 32</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span><span class='id identifier rubyid_char'>char</span><span class='comma'>,</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
+    <span class='id identifier rubyid_cont'>cont</span> <span class='op'>=</span> <span class='ivar'>@cont</span>
+    <span class='id identifier rubyid_cont'>cont</span><span class='period'>.</span><span class='id identifier rubyid_delete'>delete</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>~</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
+ <span class='id identifier rubyid_cont'>cont</span><span class='lbracket'>[</span><span class='id identifier rubyid_char'>char</span><span class='rbracket'>]</span><span class='op'>=</span><span class='id identifier rubyid_data'>data</span>
+ <span class='id identifier rubyid_cont'>cont</span><span class='op'>&lt;&lt;</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>~</span><span class='tstring_end'>&quot;</span></span>
+ <span class='ivar'>@cont</span> <span class='op'>=</span> <span class='id identifier rubyid_cont'>cont</span>
+    <span class='id identifier rubyid_write_to_file'>write_to_file</span><span class='lparen'>(</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+
+      <div class="method_details ">
+  <h3 class="signature " id="read-instance_method">
+
+    - (<tt>Object</tt>) <strong>read</strong>(char)
+
+
+
+
+
+</h3><div class="docstring">
+  <div class="discussion">
+
+<p>Read a character from a specific location.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+23
+24
+25</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 23</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_char'>char</span><span class='rparen'>)</span>
+	<span class='kw'>return</span> <span class='ivar'>@cont</span><span class='lbracket'>[</span><span class='id identifier rubyid_char'>char</span><span class='rbracket'>]</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+
+      <div class="method_details ">
+  <h3 class="signature " id="write-instance_method">
+
+    - (<tt>void</tt>) <strong>write</strong>(char, data)
+
+
+
+
+
+</h3><div class="docstring">
+  <div class="discussion">
+    <p class="note returns_void">This method returns an undefined value.</p>
+<p>Writes a character at a specific location</p>
+
+
+  </div>
+</div>
+<div class="tags">
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+32
+33
+34
+35
+36
+37
+38
+39</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 32</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span><span class='id identifier rubyid_char'>char</span><span class='comma'>,</span><span class='id identifier rubyid_data'>data</span><span class='rparen'>)</span>
     <span class='id identifier rubyid_cont'>cont</span> <span class='op'>=</span> <span class='ivar'>@cont</span>
@@ -577,7 +705,7 @@ reading of data off of .tap files</p>
       <div class="method_details ">
   <h3 class="signature " id="write_to_file-instance_method">
 
-    - (<tt>void</tt>) <strong>write_to_file</strong>
+    - (<tt>Object</tt>) <strong>write_to_file</strong>
 
 
 
@@ -585,7 +713,7 @@ reading of data off of .tap files</p>
 
 </h3><div class="docstring">
   <div class="discussion">
-    <p class="note returns_void">This method returns an undefined value.</p>
+
 <p>Method to update .tap file</p>
 
 
@@ -600,17 +728,17 @@ reading of data off of .tap files</p>
       <pre class="lines">
 
 
-41
-42
-43
 44
 45
 46
 47
-48</pre>
+48
+49
+50
+51</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/tapedrive/tape.rb', line 44</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_write_to_file'>write_to_file</span><span class='lparen'>(</span><span class='rparen'>)</span>
  <span class='id identifier rubyid_f'>f</span> <span class='op'>=</span> <span class='const'>File</span><span class='period'>.</span><span class='id identifier rubyid_open'>open</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>./</span><span class='tstring_end'>&quot;</span></span><span class='op'>+</span><span class='ivar'>@name</span><span class='op'>+</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>.tap</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>w</span><span class='tstring_end'>&quot;</span></span><span class='rparen'>)</span>
@@ -630,7 +758,7 @@ reading of data off of .tap files</p>
 </div>
 
     <div id="footer">
-  Generated on Wed Mar  9 18:17:03 2016 by
+  Generated on Thu Mar 10 09:02:48 2016 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.1.0).
 </div>
