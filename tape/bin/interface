@@ -44,8 +44,8 @@ while op != "s" or op != "S"
       end_pos = gets.chomp.to_i
       puts drive.read(start,end_pos)
     when "s"
-    drive.flush()
     drive.eject()
+    exit
    end   
 
 end
