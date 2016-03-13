@@ -3,14 +3,12 @@ require "tapedrive/tape"
 # Used for high level reading and writing of tapes
 class TapeDrive
   # Initalizes a new tapedrive object.
-  # @!method eject()
   def initialize()
     @tape=nil
   end
 
   # Ejects the current tape
-  # @!method eject()
-  #   @return [void]
+  # @return [void]
   def eject()
     unless @tape.nil?#If the tape variable is nil, there is no tape and so no need to eject it.
       @tape.write_to_file()#Write any unsaved changes to disk.
@@ -19,9 +17,8 @@ class TapeDrive
   end
 
   # Insert a new tape
-  # @!method insert(name)
-  #   @param name [String] Name of tape to insert
-  #   @return [void]
+  # @param name [String] Name of tape to insert
+  # @return [void]
   def insert(name)
     if @tape == nil#make sure thre is no tape already in so we do not overwrite the tape.
       @tape = Tape.new(name)#set the tape variable to a new tape.
@@ -31,10 +28,9 @@ class TapeDrive
   end
 
   # Write a string on to the tape.
-  # @!method write(data, start=0)
-  #   @param data [String] String to write
-  #   @param start [Integer] Start location for writing.
-  #   @return [void]
+  # @param data [String] String to write
+  # @param start [Integer] Start location for writing.
+  #@return [void]
   def write(data,start=0)
     start=start
     data.each_char do |val|#Start the each loop
@@ -44,22 +40,21 @@ class TapeDrive
   end
 
   # Read a string on the tape
-  # @!method read(start=0,end_pos-nil)
-  #   @param start [Integer] Start positiion for reading.
-  #   @param end_pos [Integer] End position for reading.
-  #  @return [String] The data read from the tape
+  # @param start [Integer] Start positiion for reading.
+  # @param end_pos [Integer] End position for reading.
+  # @return [String] The data read from the tape
    def read(start=0,end_pos=nil)
      start=start
      end_pos = end_pos
      string = ""#We have not read any characters yet, so set this to a blank string.
-     unless end_pos.nil?#If the end position does not equal nil read a chunk, otherwise read the whole tape.
+     unless end_pos.nil?#If the end position does not equal nil, read a chunk, otherwise read the whole tape.
        range = start..end_pos#set the range to read.
        range.each do |val|#begin the each.
          string += @tape.read(val)#read in the next character.
        end
      else#read the whole tape
        while true
-         char = @tape.read(start)#read the next char
+         char = @tape.read(start)#read the next charhacter
          if char == "~"#If the character equals the end character, end the read.
          break
        else
@@ -71,12 +66,6 @@ class TapeDrive
      return string#return the string
   end
 
-  # Flush any unsaved changes to disk(It should do this in write() or eject() but if it does not, this will.)
-  # @!method flush()
-  #   @return [void]
-  def flush()
-    @tape.write_to_file()
-  end
 end
 
 
