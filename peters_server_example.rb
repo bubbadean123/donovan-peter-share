@@ -1,7 +1,7 @@
 require 'socket'
 require 'stringio'
 
-addr = "10.0.0.2"
+addr = "10.0.0.6"
 port = 65534
 
 server = TCPServer.new(addr, port)
@@ -11,7 +11,7 @@ begin
   maintain_connection = false
   loop do
     client = server.accept
-    puts "New connection from #{client.local_address.to_s}" unless maintain_connection
+    puts "New connection from #{client.local_address.inspect}" unless maintain_connection
     maintain_connection = true
     header = client.gets
     case header
