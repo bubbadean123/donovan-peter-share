@@ -1,6 +1,6 @@
-# Core for tapedrive gem
-# Defines a tape object
-# Used for low level storing and reading of data off of .tap files
+# Core for tapedrive gem\n
+# Defines a tape object\n
+# Used for low level storing and reading of data off of .tap files\n
 class Tape
   attr_reader :name
   # @!attribute [r] name

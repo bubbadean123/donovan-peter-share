@@ -1,8 +1,8 @@
 require "tapedrive/tape"
-# Defines a tapedrive object
+# Defines a TapeDrive object
 # Used for high level reading and writing of tapes
 class TapeDrive
-  # Initalizes a new tapedrive object.
+  # Initalizes a new TapeDrive object.
   def initialize()
     @tape=nil
   end
