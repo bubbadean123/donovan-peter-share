@@ -44,6 +44,7 @@ http.createServer(function(request,response){
           if (used.indexOf(i)==-1) {
             break;
           }
+          i=i+1
         }
         used.push(i);
         items[i]=data;
@@ -53,41 +54,72 @@ http.createServer(function(request,response){
         response.end(JSON.stringify(i));
       });
     } else if (method=='GET') {
-      response.writeHead(201, {
+      response.writeHead(200, {
         'Content-Type': 'application/json',
       });
       response.end(JSON.stringify(used));
+    } else if (method=='HEAD') {
+      response.writeHead(200, {
+        'Content-Type': 'application/json',
+      });
+      response.end();
     } else if (method=='PUT') {
       get_body(request,function(data) {
         items=data.split(',');
-        len=items.length
-        i=0
-        used=[]
+        len=items.length();
+        i=0;
+        used=[];
         while (i<len) {
           used.push(i);
           i=i+1;
         }
       });
+    } else if (method=='DELETE') {
+      items=[];
+      used=[];
+      response.writeHead(201);
+      response.end();
+    } else if (method=='OPTIONS') {
+      response.writeHead(200, {
+        'Content-Type': 'text/plain',
+      });
+      response.end('GET\nPUT\nPOST\nDELEE');
     } else {
       response.writeHead(405);
       response.end();
     }
   } else if (url.match(/^\/items\/[0-9]+$/) != null) {
     if (method=='GET') {
-      console.log('Returning value')
       urlarray=url.split('/');
       index=parseInt(urlarray[2]);
-      response.writeHead(200, {
-        'Content-Type': 'application/json',
-      });
+      if (items[index]!=undefined) {
+        response.writeHead(200, {
+          'Content-Type': 'application/json',
+        });
       response.end(JSON.stringify(items[index]));
+      } else {
+        response.writeHead(404);
+        response.end();
+      }
+    } else if (method=='HEAD') {
+      urlarray=url.split('/');
+      index=parseInt(urlarray[2]);
+      if (items[index]!=undefined) {
+        response.writeHead(200, {
+          'Content-Type': 'application/json',
+        });
+      response.end();
+      } else {
+        response.writeHead(404);
+        response.end();
+      }
     } else if (method=='DELETE') {
-      get_body(request,function(data){
-        if (arraySearch(used,data)!=false) {
-          delete used[arraySearch(used,data)];
-          delete items[data];
-        }
-      });
+      urlarray=url.split('/');
+      index=parseInt(urlarray[2]);
+      if (arraySearch(used,index)!=false) {
+        delete used[arraySearch(used,index)];
+        delete items[index];
+      }
       response.writeHead(201);
       response.end();
     } else if (method=='PUT') {
@@ -101,6 +133,11 @@ http.createServer(function(request,response){
       });
       response.writeHead(201);
       response.end();
+    } else if (method=='OPTIONS') {
+      response.writeHead(200, {
+        'Content-Type': 'text/plain',
+      });
+      response.end('GET\nPUT\nDELETE');
     } else {
       response.writeHead(405);
       response.end();
