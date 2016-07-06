@@ -2,40 +2,25 @@ var items=[];
 var used=[];
 const parser = require('url');
 const http = require("http");
-var fs = require('fs');
-var readline = require('readline');
 var arraySearch = function(arr,val) {
     for (var i=0; i<arr.length; i++)
         if (arr[i] === val)                    
             return i;
-    return false;
+    return -1;
   }
-var load_array = function(filename) {
-  i=0
-  array=[]
-  readline.createInterface({
-      input: fs.createReadStream(filename),
-      terminal: false
-  }).on('line', function(line) {
-    array[i]=line;
-    i=i+1
-  });
-  return array
-}
 var get_body = function(request,callback) {
   var data = '';
   request.on('data', function(chunk) {
       data += chunk;                                                                 
   });
   request.on('end', function() {
-      console.log(data);
       return callback(data);
   });
 }
 http.createServer(function(request,response){
   var method = request.method;
-  console.log(method)
   var url = request.url;
+  console.log(method+':'+url)
   if (url=='/items') {
     if (method=='POST') {
       get_body(request,function(data){
@@ -47,6 +32,7 @@ http.createServer(function(request,response){
           i=i+1
         }
         used.push(i);
+        console.log(used);
         items[i]=data;
         response.writeHead(201, {
           'Content-Type': 'application/json',
@@ -57,7 +43,7 @@ http.createServer(function(request,response){
       response.writeHead(200, {
         'Content-Type': 'application/json',
       });
-      response.end(JSON.stringify(used));
+      response.end(JSON.stringify(items));
     } else if (method=='HEAD') {
       response.writeHead(200, {
         'Content-Type': 'application/json',
@@ -83,7 +69,7 @@ http.createServer(function(request,response){
       response.writeHead(200, {
         'Content-Type': 'text/plain',
       });
-      response.end('GET\nPUT\nPOST\nDELEE');
+      response.end('GET\nPUT\nPOST\nDELETE\nOPTIONS\nHEAD');
     } else {
       response.writeHead(405);
       response.end();
@@ -116,7 +102,7 @@ http.createServer(function(request,response){
     } else if (method=='DELETE') {
       urlarray=url.split('/');
       index=parseInt(urlarray[2]);
-      if (arraySearch(used,index)!=false) {
+      if (arraySearch(used,index)!=-1) {
         delete used[arraySearch(used,index)];
         delete items[index];
       }
@@ -137,7 +123,7 @@ http.createServer(function(request,response){
       response.writeHead(200, {
         'Content-Type': 'text/plain',
       });
-      response.end('GET\nPUT\nDELETE');
+      response.end('GET\nPUT\nDELETE\nOPTIONS\nHEAD');
     } else {
       response.writeHead(405);
       response.end();
