@@ -67,9 +67,9 @@ http.createServer(function(request,response){
       response.end();
     } else if (method=='OPTIONS') {
       response.writeHead(200, {
-        'Content-Type': 'text/plain',
+        'Content-Type': 'application/json',
       });
-      response.end('GET\nPUT\nPOST\nDELETE\nOPTIONS\nHEAD');
+      response.end(JSON.strigify('GET\nPUT\nPOST\nDELETE\nOPTIONS\nHEAD'));
     } else {
       response.writeHead(405);
       response.end();
