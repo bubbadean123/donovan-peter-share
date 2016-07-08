@@ -60,6 +60,10 @@ http.createServer(function(request,response){
           i=i+1;
         }
       });
+      response.writeHead(201, {
+        'Content-Type': 'application/json',
+      });
+      response.end();
     } else if (method=='DELETE') {
       items=[];
       used=[];

@@ -3,11 +3,6 @@ class HTTPClient
       @http = Net::HTTP.new(host, port)
       @res=nil
       @url=nil
-      begin
-        get("/")
-     rescue
-        puts "Connection issue"
-     end
   end
   def get(url)
     begin
@@ -35,7 +30,9 @@ class HTTPClient
   end
   def post(url,body)
     begin
-      response = @http.request(Net::HTTP::Delete.new(url))
+      request = Net::HTTP::Post.new(url)
+      request.body=body
+      response = @http.request(request)
       @res=response
       @url=url
       return response
@@ -84,5 +81,8 @@ class HTTPClient
   end
   def res()
     return @res
+  end
+  def inspect
+    return @http.inspect();
   end
 end
