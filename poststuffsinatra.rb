@@ -7,13 +7,13 @@ post "/items" do
   data = request.body.read
   i=0
   while true
-    if (used.index(i)==nil)
-      break;
+    if used.index(i)==nil
+      break
     end
     i=i+1
   end
-  used.push(i);
-  items[i]=data;
+  used.push(i)
+  items[i]=data
   status 201
   headers({"Content-Type"=>"application/json"})
   body i.to_json
@@ -62,7 +62,7 @@ head "/items/:id" do
 end
 delete "/items/:id" do
   index=params[:id].to_i
-  if (used.index(index)==nil) 
+  if (used.index(index)!=nil) 
     used.delete(used.index(index))
     items.delete(index)
   end
