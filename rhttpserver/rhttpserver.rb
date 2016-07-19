@@ -2,7 +2,7 @@ require 'socket'
 require 'io/wait'
 Thread::abort_on_exception=true
 server = TCPServer.new 2000
-debug=true
+debug=false
 index=<<eos
   <DOCTYPE html>
   <html>
@@ -134,7 +134,7 @@ loop do
       elsif url=="/site.css"
         send_response("200 OK",{"Content-Type"=>"text/css"},css,client,url,debug)
       else
-        send_response("404 Not Found",{"Content-Type"=>"text/plain"},"",client,url,debug)
+        send_response("404 Not Found",{"Content-Type"=>"text/html"},"<DOCTYPE html><html><head></head><body></body></html>",client,url,debug)
       end
       client.close
     rescue Exception=>e
