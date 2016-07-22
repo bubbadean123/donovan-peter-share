@@ -1,5 +1,6 @@
 require 'socket'
 require 'io/wait'
+require "base64"
 Thread::abort_on_exception=true
 server = TCPServer.new 2000
 debug=false
@@ -26,6 +27,16 @@ index=<<eos
         Your browser does not support the audio tag.
       </audio> 
     </body>
+  </html>
+eos
+secure=<<eos
+  <DOCTYPE html>
+  <html>
+    <head>
+      <title>Secure</title>
+    </head>
+    <body>
+      <h1 class="centertext">Secure page</h1>
   </html>
 eos
 css=File.open("site.css", "rb") {|io| io.read}

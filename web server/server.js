@@ -2,8 +2,11 @@ function svid (movie,req,res,url,audio) {
   var total = movie.length;
   var range = req.headers.range;
   var positions = range.replace(/bytes=/, "").split("-");
+  console.log(positions);
   var start = parseInt(positions[0], 10);
+  console.log(start);
   var end = positions[1] ? parseInt(positions[1], 10) : total - 1;
+  console.log(end);
   var chunksize = (end-start)+1;
   if (audio) {
     res.writeHead(206, { "Content-Range": "bytes " + start + "-" + end + "/" + total,
