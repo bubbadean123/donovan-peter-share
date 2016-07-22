@@ -29,16 +29,6 @@ index=<<eos
     </body>
   </html>
 eos
-secure=<<eos
-  <DOCTYPE html>
-  <html>
-    <head>
-      <title>Secure</title>
-    </head>
-    <body>
-      <h1 class="centertext">Secure page</h1>
-  </html>
-eos
 css=File.open("site.css", "rb") {|io| io.read}
 home=File.open("Home.jpg", "rb") {|io| io.read}
 intro_mp=File.open("Intro.mp4", "rb") {|io| io.read}

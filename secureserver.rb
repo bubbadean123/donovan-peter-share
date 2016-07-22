@@ -1,20 +1,42 @@
 require "socket"
 require "io/wait"
 require "base64"
-require "securerandom"
 Thread::abort_on_exception=true
-users={"admin"=>0,"user"=>1}
-status=["admin","normal"]
-pass=["1638","pass"]
-users.each do |key,value|
-  if status[value] == "admin"
-    puts "User #{key} is an admin with password #{pass[value]}"
-  elsif status[value] == "normal"
-    puts "User #{key} is a normal user with password #{pass[value]}"
+$users={"admin"=>0,"user"=>1}
+$status=["admin","normal"]
+$pass=["1638","pass"]
+$users.each do |key,value|
+  if $status[value] == "admin"
+    puts "User #{key} is an admin with password #{$pass[value]}"
+  elsif $status[value] == "normal"
+    puts "User #{key} is a normal user with password #{$pass[value]}"
   end
 end
 server = TCPServer.new 2000
 debug=true
+empty=<<eos
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <title></title>
+    </head>
+    <body>
+      <a href="/">Index</a>
+    </body>
+  </html>
+eos
+index=<<eos
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <title>Index</title>
+    </head>
+    <body>
+      <h1>Index page</h1>
+      <a href="/secure">Secure</a>
+    </body>
+  </html>
+eos
 secure=<<eos
   <!DOCTYPE html>
   <html>
@@ -23,38 +45,7 @@ secure=<<eos
     </head>
     <body>
       <h1>Secure page</h1>
-  </html>
-eos
-bad=<<eos
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <title></title>
-    </head>
-    <body>
-    <h1> Bad User/Password combo</h1>
-    </body>
-  </html>
-eos
-noauth=<<eos
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <title></title>
-    </head>
-    <body>
-    <h1>Authorization Required</h1>
-    </body>
-  </html>
-eos
-nouser=<<eos
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <title></title>
-    </head>
-    <body>
-    <h1>No User</h1>
+      <a href="/">Index</a>
     </body>
   </html>
 eos
@@ -99,16 +90,32 @@ def send_response(status,headers,body,client,url,debug)
   client.puts "HTTP/1.1 #{status}\n#{header}\n#{body}\000"
   client.close
 end
-def get_auth(headers)
-  if headers["Authorization"]
-    auth=headers["Authorization"].split(" ")[1]
-    auth=Base64.decode64(auth).split(":")
-    user=auth[0]
-    pass=auth[1]
-    puts "User #{user} logging in with password #{pass}"
-    return [user,pass]  
+def procces_req(url,headers,urls,good,bad,nou,noa,notf)
+  if urls.include? url
+    if headers["Authorization"]
+      auth=headers["Authorization"].split(" ")[1]
+      auth=Base64.decode64(auth).split(":")
+      user=auth[0]
+      pass=auth[1]
+      auth=[user,pass]  
+    else
+      auth="No auth"
+    end
+    unless auth == "No auth"
+      if $users.has_key? user
+        if $pass[$users[user]]==pass
+          good.call
+        else
+          bad.call
+        end
+      else
+        nou.call  
+      end
+    else
+      noa.call
+    end
   else
-    return "No auth"
+    notf.call
   end
 end
 puts "Server running on localhost:2000"
@@ -123,26 +130,35 @@ loop do
     temp=url.gsub("%20"," ")
     if debug
       puts "#{method} #{temp}"
+      puts "Body:#{body}"
     end
-    auth=get_auth(headers)
-    unless auth == "No auth"
-      user=auth[0]
-      password=auth[1]
-      if users.has_key? user
-        if pass[users[user]]==password
-          puts "Good auth"
-          send_response("200 OK",{"Content-Type"=>"text/html"},secure,client,url,debug)
-        else
-          puts "Bad auth"
-          send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},bad,client,url,debug)
-        end
-      else
-        puts "No user"
-        send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},nouser,client,url,debug)
+    procces_req(url,headers,["/","/secure"],lambda {
+      #Good Auth
+      case url
+      when "/secure"
+        send_response("200 OK",{"Content-Type"=>"text/html"},secure,client,url,debug)
+      when "/"
+        send_response("200 OK",{"Content-Type"=>"text/html"},index,client,url,debug)
       end
-    else
-      puts "No auth"
-      send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},noauth,client,url,debug)
-    end
+    },lambda {
+      #Bad Auth
+      send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},empty,client,url,debug)    
+    },lambda {
+      #No User
+      send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},empty,client,url,debug)  
+    },lambda {
+      #No Auth
+      case url
+        when "/secure"
+          send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},empty,client,url,debug)
+        when "/"
+          send_response("200 OK",{"Content-Type"=>"text/html"},index,client,url,debug)
+      end
+    }, lambda {
+      unless debug
+        puts "Not Found"
+      end
+      send_response("404 Not Found",{"Content-Type"=>"text/html"},empty,client,url,debug) 
+    })
   end
 end
