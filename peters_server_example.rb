@@ -1,12 +1,18 @@
-require 'socket'
-require 'stringio'
-
-addr = "10.0.0.6"
+require "socket"
+require "stringio"
+def local_ip
+  orig, Socket.do_not_reverse_lookup = Socket.do_not_reverse_lookup, true
+    UDPSocket.open do |s|
+      s.connect '64.233.187.99', 1
+      s.addr.last
+    end
+  ensure
+    Socket.do_not_reverse_lookup = orig
+end
+addr = local_ip
 port = 65534
-
 server = TCPServer.new(addr, port)
 puts "Started Server on #{port}"
-
 begin
   maintain_connection = false
   loop do
