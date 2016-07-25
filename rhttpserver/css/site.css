@@ -1,0 +1,26 @@
+.centerimg {
+    display: block;
+    margin-left: auto;
+    margin-right: auto
+}
+
+.centertable {
+    margin: 0px auto
+}
+
+.centertext {
+    text-align: center;
+}
+
+p.nomargin {
+    margin: 0;
+    padding: 0;
+}
+
+.blue {
+    color: blue
+}
+
+body {
+    background-color: lightskyblue
+}
