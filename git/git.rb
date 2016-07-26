@@ -1,5 +1,8 @@
+require "socket"
+cname=Socket.gethostname
+fdir=File.expand_path(File.dirname(__FILE__))
+file="#{fdir}/#{cname}-repos.txt"
 puts "Load(Y/N)"
-file="~/Desktop/repos.txt"
 loadv=gets.chomp
 if loadv=="y" or loadv=="Y"
   if File.exist?(File.expand_path(file))
@@ -74,4 +77,16 @@ else
     end
   end
 end
-puts Dir.pwd
+command=""
+while command !="q" or command !="Q"
+  puts "Command:"
+  command=gets.chomp
+  case command
+  when "log"
+    puts `git log`
+  when "q","Q"
+    puts "Quiting"
+  else
+    puts "Bad command"
+  end
+end
