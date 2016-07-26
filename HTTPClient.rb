@@ -1,3 +1,4 @@
+require "net/http"
 class HTTPClient
   def initialize(host,port=80)
       @http = Net::HTTP.new(host, port)
