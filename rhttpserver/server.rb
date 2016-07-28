@@ -1,7 +1,7 @@
 require "socket"
 require "io/wait"
 require "base64"
-Dir.chdir("/Users/anneterpstra/Desktop/Peter's Folder/programming stuff/rhttpserver")
+puts Dir.pwd
 Thread::abort_on_exception=true
 $users={"admin"=>0,"user"=>1}
 $status=["admin","normal"]
@@ -57,7 +57,15 @@ def send_response(status,headers,body,client,url,debug)
   client.close
 end
 def procces_req(url,headers,good,bad,nou,noa,notf)
-  if File.exist?(url)
+  ext=File.extname(url)
+  if ext[1]!="s"
+    ext[0]=""
+    ext=".s"+ext
+  end
+  urls=File.dirname(url)+"/"+File.basename(url,File.extname(url))+ext
+  puts urls
+  puts File.exist?(urls) 
+  if File.exist?(url) or File.exist?(urls) 
     if headers["Authorization"]
       auth=headers["Authorization"].split(" ")[1]
       auth=Base64.decode64(auth).split(":")
@@ -118,21 +126,39 @@ def fix(url)
     return url
   when ".txt"
     return url
+  when ".stxt"
+    return url
   when ".css"
+    return url
+  when ".scss"
     return url
   when ".js"
     return url
+  when ".sjs"
+    return url
   when ".jpg",".jpeg"
+    return url
+  when ".sjpg",".sjpeg"
     return url
   when ".png"
     return url
+  when ".scss"
+    return url
   when ".mp3"
+    return url
+  when ".smp3"
     return url
   when ".ogg"
     return url
+  when ".sogg"
+    return url
   when ".mp4"
     return url
+  when ".smp4"
+    return url
   when ".webm"
+    return url
+  when ".swebm"
     return url
   else
     return url+".html"
@@ -143,21 +169,24 @@ def secure(url)
   if ext[1]=="s"
     ext[1]=""
   end
-  urln="./"+File.basename(url,File.extname(url))+ext
+  urln="./"+File.dirname(url)+"/"+File.basename(url,File.extname(url))+ext
   ext=File.extname(url)
   if ext[1]!="s"
     ext[0]=""
     ext=".s"+ext
   end
-  urls="./"+File.basename(url,File.extname(url))+ext
+  urls="./"+File.dirname(url)+"/"+File.basename(url,File.extname(url))+ext
   if File.exist?(urls)
     return true
-  elsif File.exist?(urlh)
+  elsif File.exist?(urln)
     return false
   else
     return false
   end
 end
+puts File.exist?("./Videos/Intro.smp4")
+puts File.exist?("./Videos/Intro.mp4")
+puts secure("./Videos/Intro.smp4")
 def sfile(file,headers,type,client,url,debug)
   total=movie.length
   range=headers["Range"]
@@ -197,17 +226,36 @@ loop do
         puts "#{method} #{url}"
       end
       procces_req(url,headers,lambda {
-          #Good Auth
-          if type(url)=="video/mp4"
-            sfile(File.open(url, "rb") {|io| io.read},headers,"mp4",client,url,debug)
-          elsif type(url)=="video/webm"
-            sfile(File.open(url, "rb") {|io| io.read},headers,"webm",client,url,debug)
-          elsif type(url)=="audio/mpeg"
-            sfile(File.open(url, "rb") {|io| io.read},headers,"mpeg",client,url,debug)
-          elsif type(url)=="audio/ogg"
-            sfile(File.open(url, "rb") {|io| io.read},headers,"ogg",client,url,debug)
+          ext=File.extname(url)
+          if ext[1]!="s"
+            ext[0]=""
+            ext=".s"+ext
+          end
+          urls=File.dirname(url)+"/"+File.basename(url,File.extname(url))+ext
+          if File.exist?(url)
+            if type(url)=="video/mp4"
+              sfile(File.open(url, "rb") {|io| io.read},headers,"mp4",client,url,debug)
+            elsif type(url)=="video/webm"
+              sfile(File.open(url, "rb") {|io| io.read},headers,"webm",client,url,debug)
+            elsif type(url)=="audio/mpeg"
+              sfile(File.open(url, "rb") {|io| io.read},headers,"mpeg",client,url,debug)
+            elsif type(url)=="audio/ogg"
+              sfile(File.open(url, "rb") {|io| io.read},headers,"ogg",client,url,debug)
+            else
+              send_response("200 OK",{"Content-Type"=>type(url)},File.read(url),client,url,debug)
+            end
           else
-            send_response("200 OK",{"Content-Type"=>type(url)},File.read(url),client,url,debug)  
+            if type(urls)=="video/mp4"
+              sfile(File.open(url, "rb") {|io| io.read},headers,"mp4",client,url,debug)
+            elsif type(urls)=="video/webm"
+              sfile(File.open(url, "rb") {|io| io.read},headers,"webm",client,url,debug)
+            elsif type(urls)=="audio/mpeg"
+              sfile(File.open(url, "rb") {|io| io.read},headers,"mpeg",client,url,debug)
+            elsif type(urls)=="audio/ogg"
+              sfile(File.open(url, "rb") {|io| io.read},headers,"ogg",client,url,debug)
+            else
+              send_response("200 OK",{"Content-Type"=>type(urls)},File.read(urls),client,url,debug)
+            end  
           end
       },lambda {
           #Bad Auth
