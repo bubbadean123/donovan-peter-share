@@ -1,20 +1,21 @@
 require "socket"
 require "io/wait"
 require "base64"
-puts Dir.pwd
 Thread::abort_on_exception=true
-$users={"admin"=>0,"user"=>1}
+server = TCPServer.new 2000
+debug=false
+$users={"admin"=>0,"normal"=>1}
 $status=["admin","normal"]
 $pass=["1638","pass"]
-$users.each do |key,value|
-  if $status[value] == "admin"
-    puts "User #{key} is an admin with password #{$pass[value]}"
-  elsif $status[value] == "normal"
-    puts "User #{key} is a normal user with password #{$pass[value]}"
+if debug
+  $users.each do |key,value|
+    if $status[value] == "admin"
+      puts "User #{key} is an admin with password #{$pass[value]}"
+    elsif $status[value] == "normal"
+      puts "User #{key} is a normal user with password #{$pass[value]}"
+    end
   end
 end
-server = TCPServer.new 2000
-debug=true
 def get_data(client)
   lines=[]
   line=client.gets
@@ -41,6 +42,7 @@ def get_data(client)
   end
   return {"lines"=>lines,"headers"=>headers,"url"=>url,"method"=>method,"body"=>body}
 end
+
 def send_response(status,headers,body,client,url,debug)
   if debug
     puts status
@@ -53,9 +55,10 @@ def send_response(status,headers,body,client,url,debug)
   headers.each do |key,value|
     header+="#{key}: #{value}\n"
   end
-  client.puts "HTTP/1.1 #{status}\n#{header}\n#{body}\000"
+  client.puts "HTTP/1.1 #{status}\n#{header}\n#{body}"
   client.close
 end
+
 def procces_req(url,headers,good,bad,nou,noa,notf)
   ext=File.extname(url)
   if ext[1]!="s"
@@ -63,8 +66,6 @@ def procces_req(url,headers,good,bad,nou,noa,notf)
     ext=".s"+ext
   end
   urls=File.dirname(url)+"/"+File.basename(url,File.extname(url))+ext
-  puts urls
-  puts File.exist?(urls) 
   if File.exist?(url) or File.exist?(urls) 
     if headers["Authorization"]
       auth=headers["Authorization"].split(" ")[1]
@@ -92,32 +93,54 @@ def procces_req(url,headers,good,bad,nou,noa,notf)
     notf.call
   end
 end
+
 def type(url)
   case File.extname(url)
   when ".html"
     return "text/html"
+  when ".shtml"
+    return "text/html"
   when ".txt"
+    return "text/plain"
+  when ".stxt"
     return "text/plain"
   when ".css"
     return "text/css"
+  when ".scss"
+    return "text/css"
   when ".js"
     return "application/javascript"
-  when ".jpg","jpeg"
+  when ".sjs"
+    return "application/javascript"
+  when ".sjpg",".sjpeg"
+    return "image/jpg"
+  when ".sjpg",".sjpeg"
     return "image/jpg"
   when ".png"
     return "image/png"
+  when ".spng"
+    return "image/png"
   when ".mp3"
+    return "audio/mpeg"
+  when ".smp3"
     return "audio/mpeg"
   when ".ogg"
     return "audio/ogg"
+  when ".sogg"
+    return "audio/ogg"
   when ".mp4"
     return "video/mp4"
+  when ".smp4"
+    return "video/mp4"
   when ".webm"
+    return "video/webm"
+  when ".swebm"
     return "video/webm"
   else
     return "text/html"
   end
 end
+
 def fix(url)
   case File.extname(url)
   when ".html"
@@ -165,44 +188,34 @@ def fix(url)
   end
 end
 def secure(url)
-  ext=File.extname(url)
-  if ext[1]=="s"
-    ext[1]=""
+  secure_files=File.readlines("./secure.txt")
+  i=0
+  secure_files.each do |value|
+    secure_files[i]=value.chomp
+    i=i+1
   end
-  urln="./"+File.dirname(url)+"/"+File.basename(url,File.extname(url))+ext
-  ext=File.extname(url)
-  if ext[1]!="s"
-    ext[0]=""
-    ext=".s"+ext
-  end
-  urls="./"+File.dirname(url)+"/"+File.basename(url,File.extname(url))+ext
-  if File.exist?(urls)
+  if secure_files.include? url
     return true
-  elsif File.exist?(urln)
-    return false
   else
     return false
   end
 end
-puts File.exist?("./Videos/Intro.smp4")
-puts File.exist?("./Videos/Intro.mp4")
-puts secure("./Videos/Intro.smp4")
 def sfile(file,headers,type,client,url,debug)
-  total=movie.length
+  total=file.length
   range=headers["Range"]
   positions=range.split("=")[1].split("-")
   start=positions[0].to_i(10)
   m_end=positions[1] ? positions[1].to_i(10) : total - 1;
   chunksize=(m_end-start)+1
-  chunk=movie[start, m_end+1]
+  chunk=file[start, m_end+1]
   if type=="mp4"
     r_headers={"Content-Range"=>"bytes #{start}-#{m_end}/#{total}","Accept-Ranges"=>"bytes","Content-Length"=>chunksize,"Content-Type"=>"video/mp4"}
   elsif type=="webm"
     r_headers={"Content-Range"=>"bytes #{start}-#{m_end}/#{total}","Accept-Ranges"=>"bytes","Content-Length"=>chunksize,"Content-Type"=>"video/webm"}
   elsif type=="mpeg"
-    r_headers={"Content-Range"=>"bytes #{start}-#{a_end}/#{total}","Accept-Ranges"=>"bytes","Content-Length"=>chunksize,"Content-Type"=>"audio/mpeg"}
+    r_headers={"Content-Range"=>"bytes #{start}-#{m_end}/#{total}","Accept-Ranges"=>"bytes","Content-Length"=>chunksize,"Content-Type"=>"audio/mpeg"}
   elsif type=="ogg"
-    r_headers={"Content-Range"=>"bytes #{start}-#{a_end}/#{total}","Accept-Ranges"=>"bytes","Content-Length"=>chunksize,"Content-Type"=>"audio/ogg"}
+    r_headers={"Content-Range"=>"bytes #{start}-#{m_end}/#{total}","Accept-Ranges"=>"bytes","Content-Length"=>chunksize,"Content-Type"=>"audio/ogg"}
   end
   return send_response("206 Partial Content",r_headers,chunk,client,url,debug)
 end
@@ -246,36 +259,36 @@ loop do
             end
           else
             if type(urls)=="video/mp4"
-              sfile(File.open(url, "rb") {|io| io.read},headers,"mp4",client,url,debug)
+              sfile(File.open(urls, "rb") {|io| io.read},headers,"mp4",client,url,debug)
             elsif type(urls)=="video/webm"
-              sfile(File.open(url, "rb") {|io| io.read},headers,"webm",client,url,debug)
+              sfile(File.open(urls, "rb") {|io| io.read},headers,"webm",client,url,debug)
             elsif type(urls)=="audio/mpeg"
-              sfile(File.open(url, "rb") {|io| io.read},headers,"mpeg",client,url,debug)
+              sfile(File.open(urls, "rb") {|io| io.read},headers,"mpeg",client,url,debug)
             elsif type(urls)=="audio/ogg"
-              sfile(File.open(url, "rb") {|io| io.read},headers,"ogg",client,url,debug)
+              sfile(File.open(urls, "rb") {|io| io.read},headers,"ogg",client,url,debug)
             else
               send_response("200 OK",{"Content-Type"=>type(urls)},File.read(urls),client,url,debug)
             end  
           end
       },lambda {
           #Bad Auth
-          send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},File.read("./empty.html"),client,url,debug)    
+          send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},File.read("./empty.html"),client,url,debug)  
       },lambda {
           #No User
-          send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},File.read("./empty.html"),client,url,debug)  
+          send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},File.read("./empty.html"),client,url,debug)
       },lambda {
           #No Auth
           if secure(url)
             send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},File.read("./empty.html"),client,url,debug)
           else
             if type(url)=="video/mp4"
-              svid(File.open(url, "rb") {|io| io.read},headers,"mp4",client,url,debug)
+              sfile(File.open(url, "rb") {|io| io.read},headers,"mp4",client,url,debug)
             elsif type(url)=="video/webm"
-              svid(File.open(url, "rb") {|io| io.read},headers,"webm",client,url,debug)
+              sfile(File.open(url, "rb") {|io| io.read},headers,"webm",client,url,debug)
             elsif type(url)=="audio/mpeg"
-              saud(File.open(url, "rb") {|io| io.read},headers,"mpeg",client,url,debug)
+              sfile(File.open(url, "rb") {|io| io.read},headers,"mpeg",client,url,debug)
             elsif type(url)=="audio/ogg"
-              saud(File.open(url, "rb") {|io| io.read},headers,"ogg",client,url,debug)
+              sfile(File.open(url, "rb") {|io| io.read},headers,"ogg",client,url,debug)
             else
               send_response("200 OK",{"Content-Type"=>type(url)},File.read(url),client,url,debug)
             end
@@ -285,6 +298,8 @@ loop do
         send_response("404 Not Found",{"Content-Type"=>"text/html"},File.read("./empty.html"),client,url,debug) 
       })
     rescue Exception=>e
+      puts e
+      puts e.backtrace
     end
   end
 end

@@ -1,4 +1,32 @@
 require "socket"
+class String
+  def split_esc()
+    escape_char=false
+    strings=[]
+    substring=""
+    self.each_char do |char|
+      if char=="\\" and escape_char==true
+        substring+="\\"
+        escape_char=false
+      elsif char=="\\" and escape_char==false
+        escape_char=true
+      elsif char==" " and escape_char==true
+         substring+=" "
+         escape_char=false
+      elsif char==" " and escape_char==false
+         strings.push(substring)
+         substring=""
+         escape_char=false
+      else
+         substring+=char
+         escape_char=false
+      end
+    end
+    strings.push(substring)
+    substring=""
+    return strings
+  end
+end
 cname=Socket.gethostname
 fdir=File.expand_path(File.dirname(__FILE__))
 file="#{fdir}/#{cname}-repos.txt"
@@ -10,15 +38,22 @@ if loadv=="y" or loadv=="Y"
     list=repos.read.split("\n")
     path=""
     while !Dir.exist?(path)
-      i=1
-      list.each do |repo|
-        repo=repo.split("/")[-1]
-        puts "#{i}. #{repo}"
-        i=i+1
-      end
-      path=list[gets.chomp.to_i-1]
+      unless list.length==1
+        i=1
+        list.each do |repo|
+          repo=repo.split("/")[-1]
+          puts "#{i}. #{repo}"
+          i=i+1
+        end
+        path=list[gets.chomp.to_i-1]
+        if path==nil
+          path=""
+        end
+      else
+      path=list[0]
       if path==nil
         path=""
+      end
       end
     end
     Dir.chdir(path)
@@ -76,17 +111,46 @@ else
       repos.close
     end
   end
-end
+end 
 command=""
-while command !="q" or command !="Q"
-  puts "Command:"
-  command=gets.chomp
-  case command
+while command[0] !="q" and command[0] !="Q"
+  print "#{File.basename(Dir.pwd)}:"
+  command=gets.chomp.split_esc
+  case command[0]
   when "log"
-    puts `git log`
+    string=`git log`
+  when "pull"
+    string=`git pull`
+  when "push"
+    string=`git push`
+  when "status"
+    string=`git status`
+  when "commit"
+    string=`git commit -m #{command[1]}`
+  when "branch"
+    string=`git branch #{command[1]}`
+  when "dbranch"
+    string=`git branch -d #{command[1]}` 
+  when "checkout"
+    string=`git checkout #{command[1]}`
+  when "merge"
+    string=`git merge #{command[1]}`
+  when "ls"
+    string=`ls`
+  when "cd"
+    string=`cd #{command[1]}`
+  when "pwd"
+    string=`pwd`    
+  when "add"
+    string=`git add #{command[1]}`
+  when "rm"
+    string=`git rm #{command[1]}`  
   when "q","Q"
-    puts "Quiting"
+    string="Quiting"
   else
-    puts "Bad command"
+    string="Bad command"
+  end
+  unless string==""
+    puts string
   end
 end
