@@ -102,7 +102,7 @@
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
     
-<p>Defines a tapedrive object Used for high level reading and writing of tapes</p>
+<p>Defines a TapeDrive object Used for high level reading and writing of tapes</p>
 
 
   </div>
@@ -169,7 +169,7 @@
 
   
     <span class="summary_desc"><div class='inline'>
-<p>Initalizes a new tapedrive object.</p>
+<p>Initalizes a new TapeDrive object.</p>
 </div></span>
   
 </li>
@@ -265,7 +265,7 @@
 </h3><div class="docstring">
   <div class="discussion">
     
-<p>Initalizes a new tapedrive object.</p>
+<p>Initalizes a new TapeDrive object.</p>
 
 
   </div>
@@ -338,9 +338,9 @@
       <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 12</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_eject'>eject</span><span class='lparen'>(</span><span class='rparen'>)</span>
-  <span class='kw'>unless</span> <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='comment'>#If the tape variable is nil, there is no tape and so no need to eject it.
-</span>    <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_write_to_file'>write_to_file</span><span class='lparen'>(</span><span class='rparen'>)</span><span class='comment'>#Write any unsaved changes to disk.
-</span>    <span class='ivar'>@tape</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comment'>#set the tape variable to nil, ejecting the tape.
+  <span class='kw'>unless</span> <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='comment'>#If the tape variable is nil, there is no tape and so no need to eject it.
+</span>    <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_write_to_file'>write_to_file</span><span class='lparen'>(</span><span class='rparen'>)</span> <span class='comment'>#Write any unsaved changes to disk.
+</span>    <span class='ivar'>@tape</span> <span class='op'>=</span> <span class='kw'>nil</span> <span class='comment'>#set the tape variable to nil, ejecting the tape.
 </span>  <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -406,8 +406,8 @@
       <pre class="code"><span class="info file"># File 'lib/tapedrive.rb', line 22</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_insert'>insert</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
-  <span class='kw'>if</span> <span class='ivar'>@tape</span> <span class='op'>==</span> <span class='kw'>nil</span><span class='comment'>#make sure thre is no tape already in so we do not overwrite the tape.
-</span>    <span class='ivar'>@tape</span> <span class='op'>=</span> <span class='const'>Tape</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span><span class='comment'>#set the tape variable to a new tape.
+  <span class='kw'>if</span> <span class='ivar'>@tape</span> <span class='op'>==</span> <span class='kw'>nil</span> <span class='comment'>#make sure thre is no tape already in so we do not overwrite the tape.
+</span>    <span class='ivar'>@tape</span> <span class='op'>=</span> <span class='const'>Tape</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span> <span class='comment'>#set the tape variable to a new tape.
 </span>  <span class='kw'>else</span>
     <span class='id identifier rubyid_puts'>puts</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Tape </span><span class='embexpr_beg'>#{</span><span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> already in,  eject first</span><span class='tstring_end'>&quot;</span></span><span class='comment'>#if a tape is already in, give a message to the user.
 </span>  <span class='kw'>end</span>
@@ -530,24 +530,24 @@
 <span class='kw'>def</span> <span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_start'>start</span><span class='op'>=</span><span class='int'>0</span><span class='comma'>,</span><span class='id identifier rubyid_end_pos'>end_pos</span><span class='op'>=</span><span class='kw'>nil</span><span class='rparen'>)</span>
    <span class='id identifier rubyid_start'>start</span><span class='op'>=</span><span class='id identifier rubyid_start'>start</span>
    <span class='id identifier rubyid_end_pos'>end_pos</span> <span class='op'>=</span> <span class='id identifier rubyid_end_pos'>end_pos</span>
-   <span class='id identifier rubyid_string'>string</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span><span class='comment'>#We have not read any characters yet, so set this to a blank string.
-</span>   <span class='kw'>unless</span> <span class='id identifier rubyid_end_pos'>end_pos</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span><span class='comment'>#If the end position does not equal nil, read a chunk, otherwise read the whole tape.
-</span>     <span class='id identifier rubyid_range'>range</span> <span class='op'>=</span> <span class='id identifier rubyid_start'>start</span><span class='op'>..</span><span class='id identifier rubyid_end_pos'>end_pos</span><span class='comment'>#set the range to read.
-</span>     <span class='id identifier rubyid_range'>range</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_val'>val</span><span class='op'>|</span><span class='comment'>#begin the each.
-</span>       <span class='id identifier rubyid_string'>string</span> <span class='op'>+=</span> <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span><span class='comment'>#read in the next character.
+   <span class='id identifier rubyid_string'>string</span> <span class='op'>=</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_end'>&quot;</span></span> <span class='comment'>#we have not read any characters yet, so set this to a blank string.
+</span>   <span class='kw'>unless</span> <span class='id identifier rubyid_end_pos'>end_pos</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='comment'>#if the end position does not equal nil, read a chunk, otherwise read the whole tape.
+</span>     <span class='id identifier rubyid_range'>range</span> <span class='op'>=</span> <span class='id identifier rubyid_start'>start</span><span class='op'>..</span><span class='id identifier rubyid_end_pos'>end_pos</span> <span class='comment'>#set the range to read.
+</span>     <span class='id identifier rubyid_range'>range</span><span class='period'>.</span><span class='id identifier rubyid_each'>each</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_val'>val</span><span class='op'>|</span> <span class='comment'>#begin the each.
+</span>       <span class='id identifier rubyid_string'>string</span> <span class='op'>+=</span> <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span> <span class='comment'>#read in the next character.
 </span>     <span class='kw'>end</span>
-   <span class='kw'>else</span><span class='comment'>#read the whole tape
+   <span class='kw'>else</span>  <span class='comment'>#read the whole tape
 </span>     <span class='kw'>while</span> <span class='kw'>true</span>
-       <span class='id identifier rubyid_char'>char</span> <span class='op'>=</span> <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_start'>start</span><span class='rparen'>)</span><span class='comment'>#read the next charhacter
-</span>       <span class='kw'>if</span> <span class='id identifier rubyid_char'>char</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>~</span><span class='tstring_end'>&quot;</span></span><span class='comment'>#If the character equals the end character, end the read.
+       <span class='id identifier rubyid_char'>char</span> <span class='op'>=</span> <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_read'>read</span><span class='lparen'>(</span><span class='id identifier rubyid_start'>start</span><span class='rparen'>)</span> <span class='comment'>#read the next charhacter
+</span>       <span class='kw'>if</span> <span class='id identifier rubyid_char'>char</span> <span class='op'>==</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>~</span><span class='tstring_end'>&quot;</span></span> <span class='comment'>#if the character equals the end character, end the read.
 </span>       <span class='kw'>break</span>
      <span class='kw'>else</span>
-         <span class='id identifier rubyid_string'>string</span> <span class='op'>+=</span> <span class='id identifier rubyid_char'>char</span><span class='comment'>#otherwise add it to the string
+         <span class='id identifier rubyid_string'>string</span> <span class='op'>+=</span> <span class='id identifier rubyid_char'>char</span> <span class='comment'>#otherwise add it to the string
 </span>    <span class='kw'>end</span>
-       <span class='id identifier rubyid_start'>start</span> <span class='op'>+=</span> <span class='int'>1</span><span class='comment'>#increment start so we can read in the next character
+       <span class='id identifier rubyid_start'>start</span> <span class='op'>+=</span> <span class='int'>1</span> <span class='comment'>#increment start so we can read in the next character
 </span>    <span class='kw'>end</span>
   <span class='kw'>end</span>
-   <span class='kw'>return</span> <span class='id identifier rubyid_string'>string</span><span class='comment'>#return the string
+   <span class='kw'>return</span> <span class='id identifier rubyid_string'>string</span> <span class='comment'>#return the string
 </span><span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -631,8 +631,8 @@
 
 <span class='kw'>def</span> <span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span><span class='id identifier rubyid_data'>data</span><span class='comma'>,</span><span class='id identifier rubyid_start'>start</span><span class='op'>=</span><span class='int'>0</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_start'>start</span><span class='op'>=</span><span class='id identifier rubyid_start'>start</span>
-  <span class='id identifier rubyid_data'>data</span><span class='period'>.</span><span class='id identifier rubyid_each_char'>each_char</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_val'>val</span><span class='op'>|</span><span class='comment'>#Start the each loop
-</span>    <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span><span class='id identifier rubyid_start'>start</span><span class='comma'>,</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span><span class='comment'>#write the next character of the string.
+  <span class='id identifier rubyid_data'>data</span><span class='period'>.</span><span class='id identifier rubyid_each_char'>each_char</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_val'>val</span><span class='op'>|</span> <span class='comment'>#start the each loop
+</span>    <span class='ivar'>@tape</span><span class='period'>.</span><span class='id identifier rubyid_write'>write</span><span class='lparen'>(</span><span class='id identifier rubyid_start'>start</span><span class='comma'>,</span><span class='id identifier rubyid_val'>val</span><span class='rparen'>)</span> <span class='comment'>#write the next character of the string.
 </span>    <span class='id identifier rubyid_start'>start</span> <span class='op'>+=</span> <span class='int'>1</span>
    <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
@@ -646,7 +646,7 @@
 </div>
 
     <div id="footer">
-  Generated on Sun Mar 20 14:15:35 2016 by
+  Generated on Thu Aug 18 07:22:15 2016 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.1.0).
 </div>

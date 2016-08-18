@@ -10,9 +10,9 @@ class TapeDrive
   # Ejects the current tape
   # @return [void]
   def eject()
-    unless @tape.nil?#If the tape variable is nil, there is no tape and so no need to eject it.
-      @tape.write_to_file()#Write any unsaved changes to disk.
-      @tape = nil#set the tape variable to nil, ejecting the tape.
+    unless @tape.nil? #If the tape variable is nil, there is no tape and so no need to eject it.
+      @tape.write_to_file() #Write any unsaved changes to disk.
+      @tape = nil #set the tape variable to nil, ejecting the tape.
     end
   end
 
@@ -20,8 +20,8 @@ class TapeDrive
   # @param name [String] Name of tape to insert
   # @return [void]
   def insert(name)
-    if @tape == nil#make sure thre is no tape already in so we do not overwrite the tape.
-      @tape = Tape.new(name)#set the tape variable to a new tape.
+    if @tape == nil #make sure thre is no tape already in so we do not overwrite the tape.
+      @tape = Tape.new(name) #set the tape variable to a new tape.
     else
       puts "Tape #{@tape.name} already in,  eject first"#if a tape is already in, give a message to the user.
     end
@@ -33,8 +33,8 @@ class TapeDrive
   #@return [void]
   def write(data,start=0)
     start=start
-    data.each_char do |val|#Start the each loop
-      @tape.write(start,val)#write the next character of the string.
+    data.each_char do |val| #start the each loop
+      @tape.write(start,val) #write the next character of the string.
       start += 1
      end
   end
@@ -46,24 +46,24 @@ class TapeDrive
    def read(start=0,end_pos=nil)
      start=start
      end_pos = end_pos
-     string = ""#We have not read any characters yet, so set this to a blank string.
-     unless end_pos.nil?#If the end position does not equal nil, read a chunk, otherwise read the whole tape.
-       range = start..end_pos#set the range to read.
-       range.each do |val|#begin the each.
-         string += @tape.read(val)#read in the next character.
+     string = "" #we have not read any characters yet, so set this to a blank string.
+     unless end_pos.nil? #if the end position does not equal nil, read a chunk, otherwise read the whole tape.
+       range = start..end_pos #set the range to read.
+       range.each do |val| #begin the each.
+         string += @tape.read(val) #read in the next character.
        end
-     else#read the whole tape
+     else  #read the whole tape
        while true
-         char = @tape.read(start)#read the next charhacter
-         if char == "~"#If the character equals the end character, end the read.
+         char = @tape.read(start) #read the next charhacter
+         if char == "~" #if the character equals the end character, end the read.
          break
        else
-           string += char#otherwise add it to the string
+           string += char #otherwise add it to the string
       end
-         start += 1#increment start so we can read in the next character
+         start += 1 #increment start so we can read in the next character
       end
     end
-     return string#return the string
+     return string #return the string
   end
 
 end

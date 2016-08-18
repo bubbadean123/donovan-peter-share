@@ -23,6 +23,5 @@ while true
     http = HTTPClient.new(host, port)
   end
   http.get(addr)
-  puts http.res.to_hash
-  puts http.res.body
+  puts http.debug_response()
 end

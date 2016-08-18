@@ -46,6 +46,5 @@ while op != "s" or op != "S"
     when "s"
     drive.eject()
     exit
-   end   
-
+   end  
 end

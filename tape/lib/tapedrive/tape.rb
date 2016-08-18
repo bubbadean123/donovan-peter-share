@@ -4,9 +4,9 @@
 class Tape
   attr_reader :name
   # @!attribute [r] name
-  #   @return [String] The name of the tape
+  # @return [String] The name of the tape
   # Initalizes a new tape object.
-  #@!method initalize(name)
+  # @!method initalize(name)
   # @param name [String] Name for the tape or .tap file
   def initialize(name)
     @cont=[]
@@ -18,16 +18,16 @@ class Tape
   end
   #Read a character from a specific location.
   # @!method read(char)
-  #   @param char [Integer] Location of character to get
-  #   @return [String]  The character read from tape
+  # @param char [Integer] Location of character to get
+  # @return [String]  The character read from tape
   def read(char)
 	return @cont[char]
   end
 
   # Writes a character at a specific location
   # @!method quit(username, message = "Quit")
-  #   @param char [Integer] Location of character to set
-  #   @param data [String] Character to write
+  # @param char [Integer] Location of character to set
+  # @param data [String] Character to write
   # @return [void]
   def write(char,data)
       cont = @cont
@@ -40,7 +40,7 @@ class Tape
 
   #Method to update .tap file
   # @!method write_to_file()
-  #   @return [void]
+  # @return [void]
   def write_to_file()
    f = File.open("./"+@name+".tap","w")
    @cont.each do |val|

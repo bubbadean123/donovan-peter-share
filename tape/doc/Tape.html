@@ -102,8 +102,8 @@
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
     
-<p>Core for tapedrive gem Defines a tape object Used for low level storing and
-reading of data off of .tap files</p>
+<p>Core for tapedrive gemn Defines a tape objectn Used for low level storing
+and reading of data off of .tap filesn</p>
 
 
   </div>
@@ -141,7 +141,7 @@ reading of data off of .tap files</p>
 
   
     <span class="summary_desc"><div class='inline'>
-<p>The name of the tape.</p>
+<p>Initalizes a new tape object.</p>
 </div></span>
   
 </li>
@@ -163,7 +163,7 @@ reading of data off of .tap files</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#initalize-instance_method" title="#initalize (instance method)">- (Object) <strong>initalize</strong>(name) </a>
+      <a href="#initalize-instance_method" title="#initalize (instance method)">- (String) <strong>initalize</strong>(name) </a>
     
 
     
@@ -187,7 +187,7 @@ reading of data off of .tap files</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#initialize-instance_method" title="#initialize (instance method)">- (Tape) <strong>initialize</strong>(name) </a>
+      <a href="#initialize-instance_method" title="#initialize (instance method)">- (String) <strong>initialize</strong>(name) </a>
     
 
     
@@ -213,7 +213,7 @@ reading of data off of .tap files</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#quit-instance_method" title="#quit (instance method)">- (Object) <strong>quit</strong>(username, message = &quot;Quit&quot;) </a>
+      <a href="#quit-instance_method" title="#quit (instance method)">- (void) <strong>quit</strong>(username, message = &quot;Quit&quot;) </a>
     
 
     
@@ -227,7 +227,9 @@ reading of data off of .tap files</p>
   
 
   
-    <span class="summary_desc"><div class='inline'></div></span>
+    <span class="summary_desc"><div class='inline'>
+<p>Writes a character at a specific location.</p>
+</div></span>
   
 </li>
 
@@ -235,7 +237,7 @@ reading of data off of .tap files</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#read-instance_method" title="#read (instance method)">- (Object) <strong>read</strong>(char) </a>
+      <a href="#read-instance_method" title="#read (instance method)">- (String) <strong>read</strong>(char) </a>
     
 
     
@@ -283,7 +285,7 @@ reading of data off of .tap files</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#write_to_file-instance_method" title="#write_to_file (instance method)">- (Object) <strong>write_to_file</strong> </a>
+      <a href="#write_to_file-instance_method" title="#write_to_file (instance method)">- (void) <strong>write_to_file</strong> </a>
     
 
     
@@ -313,7 +315,7 @@ reading of data off of .tap files</p>
     <div class="method_details first">
   <h3 class="signature first" id="initialize-instance_method">
   
-    - (<tt><span class='object_link'><a href="" title="Tape (class)">Tape</a></span></tt>) <strong>initialize</strong>(name) 
+    - (<tt>String</tt>) <strong>initialize</strong>(name) 
   
 
   
@@ -400,13 +402,33 @@ reading of data off of .tap files</p>
 </h3><div class="docstring">
   <div class="discussion">
     
-<p>Returns The name of the tape</p>
+<p>Initalizes a new tape object.</p>
 
 
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>name</span>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>Name for the tape or .tap file</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 <p class="tag_title">Returns:</p>
 <ul class="return">
   
@@ -457,7 +479,7 @@ reading of data off of .tap files</p>
       <div class="method_details first">
   <h3 class="signature first" id="initalize-instance_method">
   
-    - (<tt>Object</tt>) <strong>initalize</strong>(name) 
+    - (<tt>String</tt>) <strong>initalize</strong>(name) 
   
 
   
@@ -493,6 +515,24 @@ reading of data off of .tap files</p>
   
 </ul>
 
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>The name of the tape</p>
+</div>
+      
+    </li>
+  
+</ul>
 
 </div><table class="source_code">
   <tr>
@@ -528,7 +568,7 @@ reading of data off of .tap files</p>
       <div class="method_details ">
   <h3 class="signature " id="quit-instance_method">
   
-    - (<tt>Object</tt>) <strong>quit</strong>(username, message = &quot;Quit&quot;) 
+    - (<tt>void</tt>) <strong>quit</strong>(username, message = &quot;Quit&quot;) 
   
 
   
@@ -536,7 +576,9 @@ reading of data off of .tap files</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    
+    <p class="note returns_void">This method returns an undefined value.</p>
+<p>Writes a character at a specific location</p>
+
 
   </div>
 </div>
@@ -613,7 +655,7 @@ reading of data off of .tap files</p>
       <div class="method_details ">
   <h3 class="signature " id="read-instance_method">
   
-    - (<tt>Object</tt>) <strong>read</strong>(char) 
+    - (<tt>String</tt>) <strong>read</strong>(char) 
   
 
   
@@ -628,7 +670,45 @@ reading of data off of .tap files</p>
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>char</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>Location of character to get</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>The character read from tape</p>
+</div>
+      
+    </li>
+  
+</ul>
 
 </div><table class="source_code">
   <tr>
@@ -669,7 +749,43 @@ reading of data off of .tap files</p>
   </div>
 </div>
 <div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
   
+    <li>
+      
+        <span class='name'>char</span>
+      
+      
+        <span class='type'>(<tt>Integer</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>Location of character to set</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>data</span>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'>
+<p>Character to write</p>
+</div>
+      
+    </li>
+  
+</ul>
+
 
 </div><table class="source_code">
   <tr>
@@ -705,7 +821,7 @@ reading of data off of .tap files</p>
       <div class="method_details ">
   <h3 class="signature " id="write_to_file-instance_method">
   
-    - (<tt>Object</tt>) <strong>write_to_file</strong> 
+    - (<tt>void</tt>) <strong>write_to_file</strong> 
   
 
   
@@ -713,7 +829,7 @@ reading of data off of .tap files</p>
   
 </h3><div class="docstring">
   <div class="discussion">
-    
+    <p class="note returns_void">This method returns an undefined value.</p>
 <p>Method to update .tap file</p>
 
 
@@ -758,7 +874,7 @@ reading of data off of .tap files</p>
 </div>
 
     <div id="footer">
-  Generated on Sun Mar 20 14:15:35 2016 by
+  Generated on Thu Aug 18 07:22:15 2016 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.8.7.6 (ruby-2.1.0).
 </div>
