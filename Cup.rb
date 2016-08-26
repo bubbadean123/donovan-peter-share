@@ -10,6 +10,7 @@ end
 
 new_enum("Size",{"Small"=>"small", "Medium"=>"medium", "Large"=>"large"})
 new_enum("Drink",{"Milk"=>"milk", "Water"=>"water", "OrangeJuice"=>"orange juice", "AppleJuice"=>"apple juice"})
+
 class Cup
   def initialize(size,drink = nil)
     if size.class != String
