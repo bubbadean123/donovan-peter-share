@@ -1,4 +1,11 @@
 require "net/http"
+
+class HTTPError < StandardError
+  def initialize(msg)
+    super
+  end
+end
+
 class HTTPClient
   def initialize(server)
       host, port = server.split(":")
@@ -6,15 +13,7 @@ class HTTPClient
       begin
         @http.request(Net::HTTP::Get.new("/"))
       rescue => e
-        error=e.message.split(' -')[0]
-        puts case error
-          when "Connection refused for " + server
-            puts "Cannot connect to " + server
-          when "the scheme http does not accept registry part: " + server + " (or bad hostname?)"
-            puts "Bad server"
-          else
-           puts error
-        end
+        puts "Failed to connect to " + server
         @connected=false
       else
         puts "Successfully connected to " + server
@@ -81,6 +80,9 @@ class HTTPClient
     return @http.inspect();
   end
 end
-youtube=HTTPClient.new("www.youtube.com")
-youtube.get("/")
-youtube.debug_response()
+
+begin
+  http = HTTPClient.new("tuygiuy")
+rescue => e
+  puts "#{e.class}:#{e.message}"
+end
