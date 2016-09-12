@@ -25,7 +25,6 @@ def read_users()
     end
     $umod_time=File.mtime("users.txt")
   end
-  puts $pass.inspect 
 end
 
 def read_sfiles()
@@ -68,6 +67,7 @@ end
 
 def send_response(status,headers,body,client,url,debug)
   if debug
+    puts "url:#{url}"
     puts status
   else
     if status.split(" ")[0]=="404"
@@ -78,18 +78,22 @@ def send_response(status,headers,body,client,url,debug)
   headers.each do |key,value|
     header+="#{key}: #{value}\n"
   end
+  puts "HTTP/1.1 #{status}\n#{header}\n#{body}"
   client.puts "HTTP/1.1 #{status}\n#{header}\n#{body}"
   client.close
 end
 
 def procces_req(url,headers,good,bad,nou,noa,notf)
+  if url == "./echo.html"
+    noa.call
+    return
+  end
   if File.exist?(url)
     if headers["Authorization"]
       auth=headers["Authorization"].split(" ")[1]
       auth=Base64.decode64(auth).split(":")
       user=auth[0]
       pass=auth[1]
-      auth=[user,pass]
       if $users.has_key? user
         if $pass[$users[user]]==pass
           good.call($status[$users[user]])
@@ -100,7 +104,6 @@ def procces_req(url,headers,good,bad,nou,noa,notf)
         nou.call  
       end  
     else
-      auth="No auth"
       noa.call
       return
     end
@@ -224,6 +227,7 @@ loop do
         puts "#{method} #{url}"
       end
       procces_req(url,headers,lambda { |level|
+          #Good Auth
           if uok(url,level)
             if type(url)=="video/mp4"
               sfile(File.open(url, "rb") {|io| io.read},headers,"mp4",client,url,debug)
@@ -250,7 +254,17 @@ loop do
           if secure(url)
             send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},File.read("./empty.html"),client,url,debug)
           else
-            if type(url)=="video/mp4"
+            if url == "./echo.html"
+              nheaders={}
+              headers.each do |n,v|
+                if n == "Content-Length"
+                  nheaders["Original-Content-Length"]=v
+                else
+                  nheaders[n]=v
+                end
+              end
+              send_response("200 OK",nheaders,body,client,url,debug)
+            elsif type(url)=="video/mp4"
               sfile(File.open(url, "rb") {|io| io.read},headers,"mp4",client,url,debug)
             elsif type(url)=="video/webm"
               sfile(File.open(url, "rb") {|io| io.read},headers,"webm",client,url,debug)
