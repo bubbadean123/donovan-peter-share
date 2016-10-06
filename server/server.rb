@@ -66,10 +66,7 @@ def get_data(client)
 end
 
 def send_response(status,headers,body,client,url,debug)
-  if debug
-    puts "url:#{url}"
-    puts status
-  else
+  unless debug
     if status.split(" ")[0]=="404"
       puts "Could not find file #{url}"
     end
@@ -78,7 +75,6 @@ def send_response(status,headers,body,client,url,debug)
   headers.each do |key,value|
     header+="#{key}: #{value}\n"
   end
-  puts "HTTP/1.1 #{status}\n#{header}\n#{body}"
   client.puts "HTTP/1.1 #{status}\n#{header}\n#{body}"
   client.close
 end
@@ -208,7 +204,7 @@ def sfile(file,headers,type,client,url,debug)
 end
 puts "Server running on localhost:2000"
 loop do
-  Thread.start(server.accept) do |client|
+    Thread.start(server.accept) do |client|
     begin
       read_users()
       temp=get_data(client)
