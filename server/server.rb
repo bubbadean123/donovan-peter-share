@@ -70,6 +70,8 @@ def send_response(status,headers,body,client,url,debug)
     if status.split(" ")[0]=="404"
       puts "Could not find file #{url}"
     end
+  else 
+    puts status
   end
   header=""
   headers.each do |key,value|
@@ -233,11 +235,18 @@ loop do
               sfile(File.open(url, "rb") {|io| io.read},headers,"mpeg",client,url,debug)
             elsif type(url)=="audio/ogg"
               sfile(File.open(url, "rb") {|io| io.read},headers,"ogg",client,url,debug)
+            elsif url=="./users.txt" && (method=="PUT" || method=="POST")
+              if method == "POST"
+                users=File.open("./users.txt","w")
+                users.puts body
+                users.close
+                send_response("204 No Content",{},"",client,url,debug)
+              end
             else
               send_response("200 OK",{"Content-Type"=>type(url)},File.read(url),client,url,debug)
             end
           else
-            send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},File.read("./empty.html"),client,url,debug)\
+            send_response("401 Unauthorized",{"WWW-Authenticate"=>"Basic realm=''","Content-Type"=>"text/html"},File.read("./empty.html"),client,url,debug)
           end
       },lambda {
           #Bad Auth

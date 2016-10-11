@@ -1,0 +1,23 @@
+<script>
+function loadDoc(file,id) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4) {
+      if (this.status == 200) {
+        document.getElementById(id).innerHTML = this.responseText;
+      }
+      if (this.status == 404) {
+        document.getElementById(id).innerHTML = "NOOOOO! A 404!";
+      }
+    }
+  };
+  xhttp.open("GET", file, true);
+  xhttp.send();
+}
+</script>
+<div id="change">This will be changed</div>
+<button type="button" onclick="loadDoc('text.txt','change')">Change Content</button>
+<br>
+<button type="button" onclick="loadDoc('original.txt','change')">Change Back</button>
+<br>
+<button type="button" onclick="loadDoc('bad.txt','change')">Cause 404</button>
