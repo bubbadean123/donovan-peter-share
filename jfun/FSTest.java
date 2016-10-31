@@ -1,6 +1,7 @@
 class FSTest {
 	public static void main(String[] args) {
-		boolean write = false;
+		boolean write = true;
+		String text;
 		byte[] data = new byte[15];
 		FS fs = new FS("test.txt",true);
 		if (write) {
@@ -21,8 +22,9 @@ class FSTest {
 			data[14]=(byte)10;
 			fs.write(data);
 		} else {
-			System.out.println(fs.avaliable());
-			data=fs.read(15);
+			data=fs.read(fs.avaliable());
+			text = new String(data);
+			System.out.println(text);
 		}
 		fs.close();
 	}

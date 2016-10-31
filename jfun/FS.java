@@ -23,13 +23,11 @@ public class FS {
 		try {
 			return in.available();
 		} catch (IOException e) {
-			System.out.println("exception");
 			return 0;
 		}
 	}
 	
-	public byte[] read(int amount) {
-		System.out.println(amount);
+	public byte[] read(int amount) 	{
 		byte[] data = new byte[amount];
 		try {
 			in.read(data);
