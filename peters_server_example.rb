@@ -12,7 +12,7 @@ end
 addr = local_ip
 port = 65534
 server = TCPServer.new(addr, port)
-puts "Started Server on #{port}"
+puts "Started Server on #{addr}:#{port}"
 begin
   maintain_connection = false
   loop do

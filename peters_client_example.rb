@@ -1,6 +1,6 @@
 require "socket"
 require "shellwords"
-dest_server_address = "127.0.0.1"
+dest_server_address = "10.0.0.33"
 dest_server_port = 65534
 message = false
   loop do

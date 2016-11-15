@@ -27,6 +27,7 @@ class HTTPClient
       response = @http.request(Net::HTTP::Get.new(url))
       @res=response
       @url=url
+      return @res.body
     end
   end
   def delete(url)
@@ -64,25 +65,10 @@ class HTTPClient
       puts "No response"
     end
   end
-  def body()
-    begin
-      return @res.body
-    rescue
-      puts "No response"
-    ensure
-      return nil
-    end
-  end
   def res()
     return @res
   end
   def inspect()
     return @http.inspect();
   end
-end
-
-begin
-  http = HTTPClient.new("tuygiuy")
-rescue => e
-  puts "#{e.class}:#{e.message}"
 end
