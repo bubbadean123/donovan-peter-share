@@ -1,0 +1,4 @@
+MONIT 0
+INR A
+STA 0
+JMP 0

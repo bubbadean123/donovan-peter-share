@@ -1,0 +1,19 @@
+devices={}
+nextid=[]
+def connect(port)
+  type=getbyte(port)
+  begin
+    id=nextid[type]
+    nextid[type]=nextid[type]+1
+  rescue
+    nextid[type]=0
+    next
+  end
+  sendbyte(port,id)
+  begin
+    devicelist=devices[type]
+    devicelist[id]=port
+  rescue
+    devices{
+  end
+end  
