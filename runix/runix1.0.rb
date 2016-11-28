@@ -48,12 +48,16 @@ unless $user=="root"
   Dir.chdir(getdir("/home/#{$user}"))
 end
 while true
-  print "#{$user}@#{cname}:#{Dir.pwd.split("/")[-1]}"
-  unless $user=="root"
-    print "$ "
-  else
-    print  "# "
-  end
+	unless Dir.pwd==getdir("/home/#{$user}")
+ 		print "#{$user}@#{cname}:#{Dir.pwd.split("/")[-1]}"
+ 	else
+ 		print "#{$user}@#{cname}:~"
+	end
+	unless $user=="root"
+		print "$ "
+	else
+		print  "# "
+	end
   cmd=gets.chomp!.asplit(" ")
   case cmd[0]
     when "login","logout"
@@ -68,7 +72,17 @@ while true
         filelimit=cmd[2].to_i
         next
       end
-      listing=Dir.entries("./")
+      if cmd[1]
+      	if cmd[1][0]=="-"
+      		if cmd[2]
+      			listing=Dir.entries(cmd[2])
+      		end
+      	else
+      		listing=Dir.entries(cmd[1])
+      	end
+      else
+      	listing=Dir.entries(".")
+      end
       unless cmd[1]=="-l" || cmd[1]=="-al"
         i=0
         listing.each do |file|
@@ -104,7 +118,7 @@ while true
       end
     when "cat"
       begin
-        lines=File.read(name).split("\n")
+        lines=File.read(cmd[1]).split("\n")
       rescue
         puts "cat: #{cmd[1]}: No such file or directory"
         next
@@ -123,6 +137,17 @@ while true
       Dir.chdir(getdir(cmd[1]))
     when "mv"
       File.rename(cmd[1],cmd[2])
+    when "mkdir"
+    	Dir.mkdir(getdir(cmd[1]))
+    when "rm"
+    	cmd.shift
+    	cmd.each do |file|
+    		if File.directory?(file)
+    			puts "rm: #{file}: is a directory"
+    		else
+    			File.delete(file)
+    		end
+    	end
     else
       path=$path.split(":")
       i=0
@@ -135,6 +160,12 @@ while true
             reader.close
             eval(file)
             writer.write("Done")
+          end
+          writer.close
+          while true
+          	if reader.read == "Done"
+          		break
+          	end
           end
           next
         rescue

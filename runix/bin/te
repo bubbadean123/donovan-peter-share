@@ -1,10 +1,18 @@
-puts"Welcome to Ruby Text Editor v1.0"
+puts "Welcome to Ruby Text Editor v1.0"
 puts "Name:"
 name=gets.chomp
-doc=File.read(name).split("\n")
+begin 
+	doc=File.read(name).split("\n")
+rescue
+	doc=[]
+end
 input=""
 i=0
-docfile=File.open(name,"r+")
+if File.exist? name
+	docfile=File.open(name,"r+")
+else
+	docfile=File.open(name,"w")	
+end
 while input!="s"
 	puts "#{i}: #{doc[i]}"
 	print "New (Enter to keep):"
