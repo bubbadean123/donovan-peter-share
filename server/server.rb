@@ -3,13 +3,30 @@ require "io/wait"
 require "base64"
 Thread::abort_on_exception=true
 server = TCPServer.new 2000
-debug=true
+debug=false
 $sfiles={}
 $users={}
+$redirects={}
 $status=[]
 $pass=[]
 $umod_time=nil
 $smod_time=nil
+$rmod_time=nil
+
+def read_redirects()
+  if $rmod_time!=File.mtime("redirects.txt")
+    lines=File.readlines("redirects.txt")
+    i=0
+    lines.each do |line|
+      if line[0]!="#"
+        line=line.chomp.split(",")
+        $redirects[line[0]]=line[1]
+        i=i+1
+      end  
+    end
+    $rmod_time=File.mtime("redirects.txt")
+  end
+end
 def read_users()
   if $umod_time!=File.mtime("users.txt")
     lines=File.readlines("users.txt")
@@ -81,10 +98,13 @@ def send_response(status,headers,body,client,url,debug)
   client.close
 end
 
-def procces_req(url,headers,good,bad,nou,noa,notf)
+def procces_req(url,headers,client,debug,good,bad,nou,noa,notf)
   if url == "./echo.html"
     noa.call
     return
+  end
+  if $redirects.has_key? url
+    send_response("301 Moved Permanently",{"Location"=>$redirects[url]},"",client,url,debug)
   end
   if File.exist?(url)
     if headers["Authorization"]
@@ -138,29 +158,10 @@ def type(url)
 end
 
 def fix(url)
-  case File.extname(url)
-  when ".html"
-    return url
-  when ".txt"
-    return url
-  when ".css"
-    return url
-  when ".js"
-    return url
-  when ".jpg",".jpeg"
-    return url
-  when ".png"
-    return url
-  when ".mp3"
-    return url
-  when ".ogg"
-    return url
-  when ".mp4"
-    return url
-  when ".webm"
-    return url
-  else
+  if File.extname(url) == ""
     return url+".html"
+  else
+    return url
   end
 end
 def secure(url)
@@ -209,6 +210,7 @@ loop do
     Thread.start(server.accept) do |client|
     begin
       read_users()
+      read_redirects()
       temp=get_data(client)
       lines=temp["lines"]
       headers=temp["headers"]
@@ -224,7 +226,7 @@ loop do
       if debug
         puts "#{method} #{url}"
       end
-      procces_req(url,headers,lambda { |level|
+      procces_req(url,headers,client,debug,lambda { |level|
           #Good Auth
           if uok(url,level)
             if type(url)=="video/mp4"

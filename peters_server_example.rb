@@ -17,7 +17,7 @@ begin
   maintain_connection = false
   loop do
     client = server.accept
-    puts "New connection from #{client.local_address.inspect}" unless maintain_connection
+    puts "New connection from #{client.local_address.getnameinfo[0]}" unless maintain_connection
     maintain_connection = true
     header = client.gets
     case header
