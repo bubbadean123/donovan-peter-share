@@ -1,7 +1,11 @@
+require "io/console"
 filelimit=3
+$cname="comp"
 $path="/bin:."
-$root="#{Dir.pwd()}"
+$root="#{Dir.pwd()}"  
 $user=""
+$pmod_time=nil
+$passwd={}
 class String
   def asplit(delimiter)
     result=[]
@@ -29,9 +33,28 @@ class String
     return result
   end
 end
-def getdir(path)
-  path=path.split("")
-  if path[0]=="/"
+class Dir
+  def self.empty?(directory)
+    return Dir.entries(directory) == ['.', '..']
+  end
+end
+def read_passwd()
+  if $pmod_time!=File.mtime("etc/passwd")
+    lines=File.readlines("etc/passwd")
+    lines.each do |line|
+     if line[0]!="#"
+       line=line.chomp.split(",")
+       $passwd[line[0]]=line[1]
+     end
+    end
+    $pmod_time=File.mtime("etc/passwd")
+  end
+end
+def getdir(opath)
+  path=opath.split("")
+  if opath=="/"
+    return $root
+  elsif path[0]=="/"
     path.shift
     path=path.join("")
     newpath=$root+"/"+path
@@ -41,17 +64,39 @@ def getdir(path)
   end
   return path.join("")
 end
-cname="comp"
-print "#{cname} login:"
-$user=gets.chomp!
-unless $user=="root"
-  Dir.chdir(getdir("/home/#{$user}"))
+def login()
+  read_passwd()
+  uok=false
+  until uok
+    print "#{$cname} login:"
+    $user=gets.chomp!
+    print "Password for #{$user}:"
+    $password=gets.chomp!
+    if $passwd[$user]==$password
+      unless $user=="root"
+        begin
+          Dir.chdir(getdir("/home/#{$user}"))
+          uok=true
+        rescue
+          puts "Login incorrect"
+        end
+      else
+        Dir.chdir(getdir("/root"))
+        uok=true
+      end
+    else
+      puts "Login incorrect"
+    end
+  end
 end
+login()
 while true
-	unless Dir.pwd==getdir("/home/#{$user}")
- 		print "#{$user}@#{cname}:#{Dir.pwd.split("/")[-1]}"
+	if Dir.pwd==getdir("/home/#{$user}") || ($user=="root" && Dir.pwd==getdir("/root"))
+   	print "#{$user}@#{$cname}:~"
+  elsif Dir.pwd==getdir("/")
+    print "#{$user}@#{$cname}:/"
  	else
- 		print "#{$user}@#{cname}:~"
+    print "#{$user}@#{$cname}:#{Dir.pwd.split("/")[-1]}"
 	end
 	unless $user=="root"
 		print "$ "
@@ -60,9 +105,10 @@ while true
 	end
   cmd=gets.chomp!.asplit(" ")
   case cmd[0]
-    when "login","logout"
-      print "#{cname} login:"
-      $user=gets.chomp!
+    when "eval"
+      eval(cmd[1])
+    when "logout"
+      login()
     when "shutdown"
       exit
     when "adduser"
@@ -134,7 +180,11 @@ while true
       file=File.open(cmd[1],"w")
       file.close()
     when "cd"
-      Dir.chdir(getdir(cmd[1]))
+      unless $user=="root" && cmd[1]=="~"
+        Dir.chdir(getdir(cmd[1]))
+      else
+        Dir.chdir(getdir("/root"))
+      end
     when "mv"
       File.rename(cmd[1],cmd[2])
     when "mkdir"
@@ -148,6 +198,12 @@ while true
     			File.delete(file)
     		end
     	end
+    when "rmdir"
+      if Dir.empty?(getdir(cmd[1]))
+        Dir.rmdir(getdir(cmd[1]))
+      else
+        puts "rmdir: failed to remove #{cmd[1]}: Directory not empty"
+      end
     else
       path=$path.split(":")
       i=0
@@ -158,7 +214,10 @@ while true
           reader, writer = IO.pipe
           fork do
             reader.close
-            eval(file)
+            cmd.shift
+            arguments=cmd.join(" ")
+            file=file.gsub("\n",";")
+            puts `ruby -e '#{file}' #{arguments}`
             writer.write("Done")
           end
           writer.close
