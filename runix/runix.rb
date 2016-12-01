@@ -227,12 +227,9 @@ while true
             end
             eval(file)
             writer.puts("Done")
-            puts "Sent done"
           end
           writer.close
           while true
-          	message=reader.read
-          	puts "Got message:#{message.inspect}"
           	if message == "Done\n"
           		break
           	end
