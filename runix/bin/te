@@ -22,6 +22,7 @@ while input!="s"
 		print "Lineno: "
 		i=gets.chomp.to_i
 	when "s"
+		puts "Got save"
 		next
 	when ""
 		i+=1
@@ -34,3 +35,4 @@ doc.each do |line|
 	docfile.puts line
 end
 docfile.close
+puts "Done"

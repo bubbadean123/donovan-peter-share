@@ -200,7 +200,11 @@ while true
     	end
     when "rmdir"
       if Dir.empty?(getdir(cmd[1]))
-        Dir.rmdir(getdir(cmd[1]))
+      	if File.exist?(getdir(cmd[1]))
+        	Dir.rmdir(getdir(cmd[1]))
+        else
+        	puts "rmdir: #{cmd[1]}: No such file or directory"
+        end
       else
         puts "rmdir: failed to remove #{cmd[1]}: Directory not empty"
       end
@@ -215,14 +219,21 @@ while true
           fork do
             reader.close
             cmd.shift
-            arguments=cmd.join(" ")
-            file=file.gsub("\n",";")
-            puts `ruby -e '#{file}' #{arguments}`
-            writer.write("Done")
+            i=0
+            args=[]
+            cmd.each do |arg|
+            	args[i]=arg
+            	i+=1
+            end
+            eval(file)
+            writer.puts("Done")
+            puts "Sent done"
           end
           writer.close
           while true
-          	if reader.read == "Done"
+          	message=reader.read
+          	puts "Got message:#{message.inspect}"
+          	if message == "Done\n"
           		break
           	end
           end
