@@ -1,0 +1,35 @@
+RUNIX=false
+if RUNIX
+	args=[]
+	args[0]="localhost:2000"
+	args[1]="/"
+	args[2]="index.html"
+else
+	args=ARGV
+end
+require "socket"
+addr=args[0].split(":")
+if addr.length==1
+	puts "curl: Address must be in format host:port"
+	exit
+end
+begin
+	server=TCPSocket.new(addr[0],addr[1])
+rescue => e
+	puts e
+	exit
+else
+end
+begin
+	file=File.open(args[2],"w")
+rescue => e
+	puts e
+	exit
+end
+server.puts "GET #{args[1]}"
+server.puts "\r\n"
+while data=server.gets
+	file.puts data
+end
+server.close
+file.close

@@ -1,7 +1,5 @@
 args=[]
 args[0]="localhost:2000"
-args[1]="get"
-args[2]="\r\n"
 require "socket"
 addr=args[0].split(":")
 if addr.length==1
@@ -22,9 +20,6 @@ rescue => e
 end
 puts file
 $server.puts file
-if args[2]
-	$server.puts args[2]
-end
 while data=$server.gets
 	puts data
 end
