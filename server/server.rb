@@ -3,7 +3,7 @@ require "io/wait"
 require "base64"
 Thread::abort_on_exception=true
 server = TCPServer.new 2000
-debug=false
+debug=true
 $sfiles={}
 $users={}
 $redirects={}
@@ -58,9 +58,11 @@ end
 def get_data(client)
   lines=[]
   line=client.gets
+  puts "Got line: #{line.inspect}"
   while line !="\r\n"
     lines<<line
     line=client.gets
+    puts "Got line: #{line.inspect}"
   end
   i=0
   lines.each do |value|
@@ -209,6 +211,7 @@ puts "Server running on localhost:2000"
 loop do
     Thread.start(server.accept) do |client|
     begin
+      puts "Got connection"
       read_users()
       read_redirects()
       temp=get_data(client)

@@ -39,18 +39,21 @@ class Dir
   end
 end
 def read_passwd()
-  if $pmod_time!=File.mtime("etc/passwd")
-    lines=File.readlines("etc/passwd")
+  if $pmod_time!=File.mtime(getpath("/etc/passwd"))
+    lines=File.readlines(getpath("/etc/passwd"))
     lines.each do |line|
      if line[0]!="#"
        line=line.chomp.split(",")
        $passwd[line[0]]=line[1]
      end
     end
-    $pmod_time=File.mtime("etc/passwd")
+    $pmod_time=File.mtime(getpath("/etc/passwd"))
   end
 end
-def getdir(opath)
+def getpath(opath)
+  if opath==nil
+    return ""
+  end
   path=opath.split("")
   if opath=="/"
     return $root
@@ -60,7 +63,7 @@ def getdir(opath)
     newpath=$root+"/"+path
     return newpath
   elsif path[0]=="~"
-    return getdir("/home/#{$user}")
+    return getpath("/home/#{$user}")
   end
   return path.join("")
 end
@@ -68,20 +71,32 @@ def login()
   read_passwd()
   uok=false
   until uok
-    print "#{$cname} login:"
-    $user=gets.chomp!
+    print "#{$cname} login:pjht\n"
+    $user="pjht"
+    if !$passwd.include? $user
+      puts "Login incorrect"
+      next
+    end
+    if $passwd[$user]==nil
+      unless $user=="root"
+        Dir.chdir(getpath("/home/#{$user}"))
+        uok=true
+        next
+      else
+        Dir.chdir(getpath("/root"))
+        uok=true
+        next
+      end
+    end
     print "Password for #{$user}:"
     $password=gets.chomp!
+    puts $password
     if $passwd[$user]==$password
       unless $user=="root"
-        begin
-          Dir.chdir(getdir("/home/#{$user}"))
-          uok=true
-        rescue
-          puts "Login incorrect"
-        end
+        Dir.chdir(getpath("/home/#{$user}"))
+        uok=true
       else
-        Dir.chdir(getdir("/root"))
+        Dir.chdir(getpath("/root"))
         uok=true
       end
     else
@@ -91,9 +106,9 @@ def login()
 end
 login()
 while true
-	if Dir.pwd==getdir("/home/#{$user}") || ($user=="root" && Dir.pwd==getdir("/root"))
+	if Dir.pwd==getpath("/home/#{$user}") || ($user=="root" && Dir.pwd==getpath("/root"))
    	print "#{$user}@#{$cname}:~"
-  elsif Dir.pwd==getdir("/")
+  elsif Dir.pwd==getpath("/")
     print "#{$user}@#{$cname}:/"
  	else
     print "#{$user}@#{$cname}:#{Dir.pwd.split("/")[-1]}"
@@ -111,8 +126,30 @@ while true
       login()
     when "shutdown"
       exit
-    when "adduser"
-      Dir.mkdir("home/#{cmd[1]}")
+    when "useradd"
+      Dir.mkdir(getpath("/home/#{cmd[1]}"))
+      passwd=File.open(getpath("/etc/passwd"),"a")
+      passwd.puts(cmd[1])
+      passwd.close
+    when "passwd"
+      puts "Changing password for user #{cmd[1]}"
+      lines=File.readlines(getpath("/etc/passwd"))
+      i=0
+      lines.each do |line|
+        if line[0]!="#"
+          line=line.chomp.split(",")
+          if line[0]==cmd[1]
+            break
+          end
+        end
+        i+=1
+      end
+      passwd=File.open(getpath("/etc/passwd"),"r")
+      i.times{
+        passwd.gets
+      }
+      puts "Line is #{passwd.gets}"
+      passwd.close
     when "ls"
       if cmd[1]=="-fl"
         filelimit=cmd[2].to_i
@@ -181,30 +218,32 @@ while true
       file.close()
     when "cd"
       unless $user=="root" && cmd[1]=="~"
-        Dir.chdir(getdir(cmd[1]))
+        Dir.chdir(getpath(cmd[1]))
       else
-        Dir.chdir(getdir("/root"))
+        Dir.chdir(getpath("/root"))
       end
     when "mv"
       File.rename(cmd[1],cmd[2])
     when "mkdir"
-    	Dir.mkdir(getdir(cmd[1]))
+    	Dir.mkdir(getpath(cmd[1]))
     when "rm"
     	cmd.shift
     	cmd.each do |file|
-    		if File.directory?(file)
+        if !File.exist?(file)
+          puts "rm: #{file}: No such file or directory"
+    		elsif File.directory?(file)
     			puts "rm: #{file}: is a directory"
     		else
     			File.delete(file)
     		end
     	end
     when "rmdir"
-      if Dir.empty?(getdir(cmd[1]))
-      	if File.exist?(getdir(cmd[1]))
-        	Dir.rmdir(getdir(cmd[1]))
-        else
-        	puts "rmdir: #{cmd[1]}: No such file or directory"
-        end
+      if !File.exist?(getpath(cmd[1]))
+        puts "rmdir: #{cmd[1]}: No such file or directory"
+        next
+      end
+      if Dir.empty?(getpath(cmd[1]))
+        Dir.rmdir(getpath(cmd[1]))
       else
         puts "rmdir: failed to remove #{cmd[1]}: Directory not empty"
       end
@@ -214,9 +253,17 @@ while true
       plen=path.length-1
       path.each do |path|
         begin
-          file=File.read(getdir(path)+"/"+cmd[0])
-          reader, writer = IO.pipe
-          fork do
+          file=File.read(getpath(path)+"/"+cmd[0])
+        rescue
+          if i==plen
+            puts "#{cmd[0]}: command not found"
+          end
+          i=i+1
+          next
+        end
+        reader, writer = IO.pipe
+        fork do
+          begin
             reader.close
             cmd.shift
             i=0
@@ -226,21 +273,23 @@ while true
             	i+=1
             end
             eval(file)
+            puts "Sending done"
             writer.puts("Done")
-          end
-          writer.close
-          while true
-          	if message == "Done\n"
-          		break
-          	end
-          end
-          next
-        rescue
-          if i==plen
-            puts "runix: #{cmd[0]}: No such file or directory"
+          rescue StandardError => e
+           puts e
+           puts "Sending done"
+           writer.puts("Done")
+           exit
           end
         end
-        i=i+1
+        writer.close
+        while true
+          message=reader.read
+        	if message == "Done\n"
+           puts "Got done"
+        		break
+        	end
+        end
      end
   end
 end
