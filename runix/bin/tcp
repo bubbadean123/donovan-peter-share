@@ -10,6 +10,7 @@ begin
 	$server=TCPSocket.new(addr[0],addr[1])
 rescue => e
 	puts e
+	exit
 else
 	puts "Connected"
 end
