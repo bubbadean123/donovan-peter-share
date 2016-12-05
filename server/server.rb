@@ -94,9 +94,12 @@ def send_response(status,headers,body,client,url,debug)
   end
   header=""
   headers.each do |key,value|
-    header+="#{key}: #{value}\n"
+    header+="#{key}: #{value}"
   end
-  client.puts "HTTP/1.1 #{status}\n#{header}\n#{body}"
+  client.puts "HTTP/1.1 #{status}"
+  client.print "#{header}"
+  client.print "\n\n"
+  client.print "#{body}"
   client.close
 end
 

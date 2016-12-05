@@ -1,4 +1,4 @@
-RUNIX=false
+RUNIX=true
 if RUNIX
 	args=[]
 	args[0]="localhost:2000"
@@ -15,21 +15,30 @@ if addr.length==1
 end
 begin
 	server=TCPSocket.new(addr[0],addr[1])
+  file=File.open(args[2],"w")
+	hfile=File.open(args[2].split(".")[0]+".head","w")
 rescue => e
 	puts e
 	exit
 else
 end
-begin
-	file=File.open(args[2],"w")
-rescue => e
-	puts e
-	exit
-end
 server.puts "GET #{args[1]}"
 server.puts "\r\n"
+endhead=false
 while data=server.gets
-	file.puts data
+	if endhead
+		puts "Body:#{data}"
+		file.puts data
+	else
+		if data=="\n"
+			puts "End of header"
+			endhead=true
+		else
+			puts "Header:#{data}"
+			hfile.puts data
+		end
+	end
 end
 server.close
 file.close
+hfile.close
