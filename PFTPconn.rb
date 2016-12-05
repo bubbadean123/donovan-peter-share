@@ -26,13 +26,17 @@ class String
     return result
   end
 end
-def fix(cmd)
-cmdst=cmd[0]
-cmd.shift
-return cmdst+" "+cmd.join(" ").gsub(" ","\\ ")
+def local_ip
+  orig, Socket.do_not_reverse_lookup = Socket.do_not_reverse_lookup, true
+    UDPSocket.open do |s|
+      s.connect '64.233.187.99', 1
+      s.addr.last
+    end
+  ensure
+    Socket.do_not_reverse_lookup = orig
 end
 begin
-  server=TCPSocket.new("10.0.0.33","65534")
+  server=TCPSocket.new(local_ip,"65534")
 rescue => e
   puts e
   exit
@@ -41,17 +45,22 @@ end
 puts server.gets
 while true
   print "pftp>"
-  cmd=gets.chomp!.asplit(" ")
-  case cmd[0]
-  when "LPWD"
-    puts "Local directory: #{Dir.pwd}"
-  when "GET","LIST"
-    server.puts fix(cmd)
+  arg=gets.chomp!.asplit(" ")
+  cmd=arg.shift
+  case cmd
+  when "get"
+    server.puts "RETR "+arg.join(" ").gsub(" ","\\ ")
     lines=server.gets.to_i
     lines.times do
       puts "#{server.gets}"
     end
-  when "PUT"
+  when "ls"
+    server.puts "LIST"
+    lines=server.gets.to_i
+    lines.times do
+      puts "#{server.gets}"
+    end
+  when "put"
     string=""
     length=0
     while true
@@ -63,13 +72,15 @@ while true
       end
       string+="#{line}\n"
     end
-    server.puts fix(cmd)
-    server.puts length
+    server.puts "STOR "+arg.join(" ").gsub(" ","\\ ")
+    puts server.gets
     server.puts string
-  when "QUIT"
+    server.puts "102 Done."
+    puts server.gets
+  when "quit"
     server.close
   else
-    server.puts fix(cmd)
+    server.puts cmd+" "+arg.join(" ").gsub(" ","\\ ")
     puts server.gets
   end
 end

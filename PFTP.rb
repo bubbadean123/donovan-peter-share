@@ -61,23 +61,18 @@ while true
           pass=data[1]
           puts "Pass:#{pass}"
           client.puts "230 Login successful."
-        when "GET"
+        when "RETR"
           puts "Retrieving #{data[1].chomp}"
+          client.puts "101 Sending file."
           lines=File.read(data[1].chomp).split("\n")
-          client.puts lines.length
           lines.each do |l|
             client.puts l
           end
+          client.puts "205 Sent file."
         when "LIST"
           puts "Sending directory listing."
           listing=Dir.entries(".")
-          length=0
-          listing.each do |listing|
-            unless listing[0]=="."
-              length+=1
-            end
-          end
-          client.puts length
+          client.puts "201 Here comes the directory listing."
           #client.puts "150 Here comes the directory listing."
           listing.each do |entry|
             unless entry[0]=="."
@@ -87,30 +82,35 @@ while true
             end
           end
           #puts "Sent"
+          client.puts "202 Direcory send OK."
           #client.puts "226 Directory send OK."
           #client.puts ""
           #puts "Sent OK"
         when "PASV"
-        puts "Listening on 1024"
-        puts "Sending pasv message"
-        client.puts "227 Entering Passive Mode (10,0,0,33,4,0)."
-        puts "Sent pasv message"
-        puts "Accepting"
-        conn=mserv.accept
-        puts "Accepted"
-        when "PUT"
-          length=client.gets.to_i
-          puts length
-          puts "Opening file"
+					puts "Listening on 1024"
+					puts "Sending pasv message"
+					client.puts "227 Entering Passive Mode (10,0,0,33,4,0)."
+					puts "Sent pasv message"
+					puts "Accepting"
+					conn=mserv.accept
+					puts "Accepted"
+        when "STOR"
           file=File.open(data[1],"w")
-          puts "Opened file"
-          length.times do
-            puts "In times"
+          client.puts "301 Send file."
+          done=false
+          until done
             line=client.gets
-            puts "Got line:#{line}"
-            file.puts line
+            puts "Got line:#{line.inspect}"
+            if line=="102 Done.\n" || line=="102 Done.\r\n"
+            	puts "We're done"
+            	done=true
+            	next
+          	else
+          		file.puts line
+          	end
           end
-          puts "Closed file"
+          puts "OUUT!"
+          client.puts "204 Stored"
           file.close
         when "CWD"
           puts "Changing directory to: #{data[1].inspect}"
@@ -118,7 +118,9 @@ while true
           puts "Changing directory to: #{data[1].inspect}"
           Dir.chdir(data[1])
           puts "Changed"
-          client.puts "250 Directory successfully changed."
+          client.puts "206 Directory successfully changed."
+      	when "PWD"
+      		client.puts "207 Directory:#{Dir.pwd}"
         else
           puts "No such command"
           client.puts "502 Command not implemented."
