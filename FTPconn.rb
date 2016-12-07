@@ -1,49 +1,44 @@
 require_relative "./FTP.rb"
-def plist(listing)
-  i=0
-  listing.each do |entry|
-   isd=entry[0]
-   listing[i]=[]
-   listing[i][0]=isd
-   listing[i][1]=entry.split(" ")[-1]
-   i+=1
-  end
-  i=0
-  listing.each do |entry|
-    if entry[0]=="d"
-      listing[i]=nil
+class String
+  def asplit(delimiter)
+    result=[]
+    escape=false
+    string=""
+    i=0
+    self.each_char  do |c|
+      if c=="\\"
+        escape=true
+      elsif c==delimiter
+        unless escape
+          result.push(string)
+          string=""
+        else
+          string+=delimiter
+          escape=false
+        end
+      else
+        string+=c
+      end
     end
-    i+=1
+    if string != ""
+      result.push string
+    end
+    return result
   end
-  listing=listing.compact
-  return listing
 end
-ftp=FTP.new("10.0.0.17","pjht","5002",true)
+ftp=FTP.new("10.0.0.17",nil,nil,false)
 num=""
 begin
 while true
-  print "upload/download(u/d):"
-  op=gets.chomp!
-  dir=ftp.list
-  dir=plist(dir)
-  case op
-  when "d"
-    i=0
-    dir.each do |entry|
-      if entry[0]=="-"
-        puts "#{i}:#{entry[1]}"
-        i+=1
-      end
-    end
-    print "File number:"
-    num=gets.chomp!
-    if num=="q"
-      break
-    end
-    puts ftp.get(dir[num.to_i][1])
-  when "u"
-    print "Name:"
-    name=gets.chomp!
+  print "ftp>"
+  arg=gets.chomp!.asplit(" ")
+  cmd=arg.shift
+  case cmd
+  when "ls"
+    ftp.list
+  when "get"
+    ftp.get(arg[0])
+  when "put"
     string=""
     done=false
     puts "Contents:(Blank line to end)"
@@ -55,12 +50,26 @@ while true
       end
       string+="#{line}\n"
     end
-    puts "Out!!"
-    puts "Putting"
-    ftp.put(string,name)
-    puts "Put successful"
+    ftp.put(string,arg[0])
+  when "cd"
+    ftp.cd(arg[0])
+  when "quit"
+    ftp.quit
+    exit
+  when "pwd"
+    ftp.pwd
+  when "toggle"
+    case arg[0]
+      when "debug"
+        ftp.debug=!ftp.debug
+    end
+  when "show"
+    case arg[0]
+      when "debug"
+        puts ftp.debug
+    end
   else
-    puts "Please specify u/d"
+    puts "?Invalid command."
   end
 end
 end

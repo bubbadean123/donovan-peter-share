@@ -1,5 +1,6 @@
 require "socket"
 require "stringio"
+Thread::abort_on_exception=true
 class String
   def asplit(delimiter)
     result=[]
@@ -44,7 +45,7 @@ puts "Started Server on #{addr}:#{port}"
 while true
   Thread.start(server.accept) do |client|
     puts "got conn"
-    client.puts "220 PFTP"
+    client.puts "200 PFTP"
     while true
       data=client.gets.asplit(" ")
       data[0].chomp!
@@ -64,15 +65,19 @@ while true
         when "RETR"
           puts "Retrieving #{data[1].chomp}"
           client.puts "101 Sending file."
-          lines=File.read(data[1].chomp).split("\n")
-          lines.each do |l|
-            client.puts l
+          if File.exist? data[1].chomp
+            lines=File.read(data[1].chomp).split("\n")
+            lines.each do |l|
+              client.puts l
+            end
+            client.puts "201 Sent file."
+          else
+            client.puts "501 File not found."
           end
-          client.puts "205 Sent file."
         when "LIST"
           puts "Sending directory listing."
           listing=Dir.entries(".")
-          client.puts "201 Here comes the directory listing."
+          client.puts "202 Here comes the directory listing."
           #client.puts "150 Here comes the directory listing."
           listing.each do |entry|
             unless entry[0]=="."
@@ -81,21 +86,24 @@ while true
               puts "Sent entry"
             end
           end
-          #puts "Sent"
-          client.puts "202 Direcory send OK."
-          #client.puts "226 Directory send OK."
+          puts "Sent"
+          client.puts "203 Directory send OK."
+          #client.puts "226 Directory send OK.\r"
+          #conn.close
           #client.puts ""
-          #puts "Sent OK"
+          puts "Sent OK"
         when "PASV"
-					puts "Listening on 1024"
-					puts "Sending pasv message"
-					client.puts "227 Entering Passive Mode (10,0,0,33,4,0)."
-					puts "Sent pasv message"
-					puts "Accepting"
-					conn=mserv.accept
-					puts "Accepted"
+          puts "Listening on 1024"
+          puts "Sending pasv message"
+          client.puts "227 Entering Passive Mode (10,0,0,33,4,0)."
+          puts "Sent pasv message"
+          puts "Accepting"
+          conn=mserv.accept
+          puts "Accepted"
+          puts conn.inspect
+          puts client.inspect
         when "STOR"
-          file=File.open(data[1],"w")
+          file=File.open(data[1].chomp,"w")
           client.puts "301 Send file."
           done=false
           until done
@@ -109,7 +117,6 @@ while true
           		file.puts line
           	end
           end
-          puts "OUUT!"
           client.puts "204 Stored"
           file.close
         when "CWD"
@@ -118,12 +125,22 @@ while true
           puts "Changing directory to: #{data[1].inspect}"
           Dir.chdir(data[1])
           puts "Changed"
-          client.puts "206 Directory successfully changed."
+          client.puts "205 Directory successfully changed."
       	when "PWD"
-      		client.puts "207 Directory:#{Dir.pwd}"
+      		client.puts "206 Directory:#{Dir.pwd}"
+        when "RNF"
+          if File.exist? data[1].chomp
+            rnf=data[1].chomp
+            client.puts "302 Waiting for RNT"
+          else
+            client.puts "501 File not found."
+          end
+        when "RNT"
+          File.rename(rnf,data[1].chomp)
+          client.puts "207 Renamed"
         else
           puts "No such command"
-          client.puts "502 Command not implemented."
+          client.puts "500 Command not implemented."
       end
     end
   end

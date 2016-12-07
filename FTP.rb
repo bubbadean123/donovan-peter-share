@@ -1,25 +1,54 @@
 require "socket"
 class FTP
+  attr_accessor :debug
   def initialize(ip,user,pass,debug=false)
-    if debug
-      control=TCPSocket.new(ip,21)
+    control=TCPSocket.new(ip,21)
+    if user==nil
       puts control.gets
-      puts "USER #{user}"
-      control.puts "USER #{user}"
+      print "Name (10.0.0.17):"
+      user=gets.chomp!
+      if debug
+        puts "USER #{user}"
+        control.puts "USER #{user}"
+      else
+        control.puts "USER #{user}"
+      end
       puts control.gets
-      puts "PASS #{pass}"
-      control.puts "PASS #{pass}"
+      print "Password:"
+      pass=gets.chomp!
+      if debug
+        puts "PASS #{pass}"
+        control.puts "PASS #{pass}"
+      else
+        control.puts "PASS #{pass}"      
+      end
       puts control.gets
     else
-      control=TCPSocket.new(ip,21)
-      control.gets
-      control.puts "USER #{user}"
-      control.gets
-      control.puts "PASS #{pass}"
-      control.gets
+      if debug
+        puts "USER #{user}"
+        control.puts "USER #{user}"
+        puts control.gets
+        puts "PASS #{pass}"
+        control.puts "PASS #{pass}"
+        puts control.gets
+      else
+        control.gets
+        control.puts "USER #{user}"
+        control.gets
+        control.puts "PASS #{pass}"
+        control.gets
+      end
     end
     @debug=debug
     @control=control
+  end
+  def quit()
+    if @debug
+      puts "QUIT"
+    end
+    @control.puts "QUIT"
+    puts @control.gets
+    @control.close
   end
   def pasv()
     if @debug
@@ -54,16 +83,17 @@ class FTP
       puts @control.gets
     else
       @control.puts "LIST"
-      @control.gets
+      puts @control.gets
       while true
         if line=data.gets
+          puts line
           result.push(line)
         else
           data.close
           break
         end
       end
-      @control.gets
+      puts @control.gets
     end
     return result
   end
@@ -86,35 +116,56 @@ class FTP
       puts @control.gets
     else
       @control.puts "RETR #{file}"
-      @control.gets
+      puts @control.gets
       while true
         if line=data.gets
+          puts line
           result.push(line)
         else
           data.close
           break
         end
       end
-      @control.gets
+      puts @control.gets
     end
     return result
   end
   def put(contents,file)
-    puts "In put"
     data=pasv()
     if @debug
       puts "STOR #{file}"
       @control.puts "STOR #{file}"
       puts @control.gets
+      puts contents
       data.puts contents
       data.close
       puts @control.gets
     else
-      @control.puts "RETR #{file}"
-      @control.gets
+      @control.puts "STOR #{file}"
+      puts @control.gets
       data.puts contents
       data.close
-      @control.gets
+      puts @control.gets
+    end
+  end
+  def cd(dir)
+    if @debug
+      puts "CWD #{dir}"
+      @control.puts "CWD #{dir}"
+      puts @control.gets
+    else
+      @control.puts "CWD #{dir}"
+      puts @control.gets
+    end
+  end
+  def pwd()
+    if @debug
+      puts "PWD"
+      @control.puts "PWD"
+      puts @control.gets
+      puts dir
+    else
+      @control.puts "PWD"
     end
   end
 end
