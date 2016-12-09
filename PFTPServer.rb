@@ -44,52 +44,58 @@ mserv = TCPServer.new(addr,1024)
 puts "Started Server on #{addr}:#{port}"
 while true
   Thread.start(server.accept) do |client|
-    puts "got conn"
-    client.puts "200 PFTP"
+    puts "Got connection from #{client.local_address.getnameinfo[0]}"
+    client.puts "220 PFTP"
     while true
-      data=client.gets.asplit(" ")
-      data[0].chomp!
-      puts "Got:#{data[0].inspect}"
-      puts "Raw: #{data.inspect}"
-      case data[0]
+      data=client.gets
+      puts "Raw:#{data.inspect}"
+      if data==nil
+        break
+      end
+      data=data.asplit(" ")
+      cmd=data[0].chomp
+      if data[1]==nil
+        data[1]=""
+      end
+      arg=data[1].chomp
+      puts "Got:#{cmd} #{arg.inspect}"
+      case cmd
         when "USER"
-          puts "Setting user to #{data[1]}"
-          user=data[1]
+          puts "Setting user to #{arg}"
+          user=arg
           puts "User:#{user}"
           client.puts "331 Please specify the password."
         when "PASS"
-          puts "Setting pass to #{data[1]}"
-          pass=data[1]
+          puts "Setting pass to #{arg}"
+          pass=arg
           puts "Pass:#{pass}"
           client.puts "230 Login successful."
         when "RETR"
-          puts "Retrieving #{data[1].chomp}"
-          client.puts "101 Sending file."
-          if File.exist? data[1].chomp
-            lines=File.read(data[1].chomp).split("\n")
+          puts "Retrieving #{arg}"
+          if File.exist? arg
+            lines=File.read(arg).split("\n")
             lines.each do |l|
               client.puts l
             end
             client.puts "201 Sent file."
           else
-            client.puts "501 File not found."
+            client.puts "502 File not found."
           end
         when "LIST"
           puts "Sending directory listing."
           listing=Dir.entries(".")
-          client.puts "202 Here comes the directory listing."
           #client.puts "150 Here comes the directory listing."
           listing.each do |entry|
             unless entry[0]=="."
-              puts "Sending entry"
+              puts "Sending entry #{entry.inspect}"
               client.puts entry
               puts "Sent entry"
             end
           end
           puts "Sent"
-          client.puts "203 Directory send OK."
+          client.puts "202 Directory send OK."
           #client.puts "226 Directory send OK.\r"
-          #conn.close
+          #$conn.close
           #client.puts ""
           puts "Sent OK"
         when "PASV"
@@ -98,18 +104,18 @@ while true
           client.puts "227 Entering Passive Mode (10,0,0,33,4,0)."
           puts "Sent pasv message"
           puts "Accepting"
-          conn=mserv.accept
+          $conn=mserv.accept
           puts "Accepted"
-          puts conn.inspect
+          puts $conn.inspect
           puts client.inspect
         when "STOR"
-          file=File.open(data[1].chomp,"w")
+          file=File.open(arg,"w")
           client.puts "301 Send file."
           done=false
           until done
-            line=client.gets
+            line=client.gets.chomp!
             puts "Got line:#{line.inspect}"
-            if line=="102 Done.\n" || line=="102 Done.\r\n"
+            if line=="SENT"
             	puts "We're done"
             	done=true
             	next
@@ -117,30 +123,35 @@ while true
           		file.puts line
           	end
           end
-          client.puts "204 Stored"
+          client.puts "203 Stored."
           file.close
         when "CWD"
-          puts "Changing directory to: #{data[1].inspect}"
-          data[1].chomp!
-          puts "Changing directory to: #{data[1].inspect}"
-          Dir.chdir(data[1])
+          puts "Changing directory to: #{arg.inspect}"
+          Dir.chdir(arg)
           puts "Changed"
-          client.puts "205 Directory successfully changed."
+          client.puts "204 Directory successfully changed."
       	when "PWD"
-      		client.puts "206 Directory:#{Dir.pwd}"
+      		client.puts "205 Directory:#{Dir.pwd}"
         when "RNF"
-          if File.exist? data[1].chomp
-            rnf=data[1].chomp
+          if File.exist? arg
+            rnf=arg
             client.puts "302 Waiting for RNT"
           else
-            client.puts "501 File not found."
+            client.puts "502 File not found."
           end
         when "RNT"
-          File.rename(rnf,data[1].chomp)
-          client.puts "207 Renamed"
+          File.rename(rnf,arg)
+          client.puts "207 Renamed."
+        when "DEL"
+          if File.exist? arg
+            File.delete(arg)
+            client.puts "208 Deleted."
+          else
+            client.puts "502 File not found."
+          end
         else
           puts "No such command"
-          client.puts "500 Command not implemented."
+          client.puts "501 Syntax error"
       end
     end
   end

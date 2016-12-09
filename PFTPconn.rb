@@ -35,66 +35,99 @@ def local_ip
   ensure
     Socket.do_not_reverse_lookup = orig
 end
-begin
-  server=TCPSocket.new(local_ip,"65534")
-rescue => e
-  puts e
-  exit
-else
-end
-puts server.gets
+server=nil
 while true
   print "pftp>"
   arg=gets.chomp!.asplit(" ")
   cmd=arg.shift
-  case cmd
-  when "get"
-    server.puts "RETR "+arg[0]
-    while true
+  if server
+    case cmd
+    when "get"
+      server.puts "RETR "+arg[0]
+      while true
+        line=server.gets.chomp!
+        puts line
+        if line=="201 Sent file." or line=="502 File not found."
+          break
+        end
+      end
+    when "ls"
+      server.puts "LIST"
+      while true
+        line=server.gets.chomp!
+        puts line
+        if line=="202 Directory send OK."
+          break
+        end
+      end
+    when "put"
+      string=""
+      length=0
+      while true
+        line=gets.chomp!
+        unless line==""
+          length+=1
+        else
+          break
+        end
+        string+="#{line}\n"
+      end
+      server.puts "STOR "+arg[0]
+      puts server.gets
+      puts string
+      server.puts string
+      server.puts "SENT"
+      puts server.gets
+    when "rn"
+      server.puts "RNF #{arg[0]}"
       line=server.gets.chomp!
       puts line
-      if line=="201 Sent file." or line=="501 File not found."
-        break
+      unless line=="502 File not found."
+        server.puts "RNT #{arg[1]}"
+        puts server.gets
       end
-    end
-  when "ls"
-    server.puts "LIST"
-    while true
-      line=server.gets.chomp!
-      puts line
-      if line=="203 Directory send OK."
-        break
+    when "rm"
+      server.puts "DEL #{arg[0]}"
+      puts server.gets
+    when "quit","exit"
+      server.close
+      exit
+    when "close"
+      if server
+        server.close
       end
-    end
-  when "put"
-    string=""
-    length=0
-    while true
-      line=gets.chomp!
-      unless line==""
-        length+=1
+    when "LIST"
+      server.puts cmd
+      puts server.gets
+      puts server.gets
+    else
+      puts arg.inspect
+      if arg==[]
+        server.puts cmd
       else
-        break
-      end
-      string+="#{line}\n"
-    end
-    server.puts "STOR "+arg[0]
-    puts server.gets
-    server.puts string
-    server.puts "102 Done."
-    puts server.gets
-  when "rn"
-    server.puts "RNF #{arg[0]}"
-    line=server.gets.chomp!
-    puts line
-    unless line=="501 File not found."
-      server.puts "RNT #{arg[1]}"
+        server.puts cmd+" "+arg[0]
+      end  
       puts server.gets
     end
-  when "quit"
-    server.close
   else
-    server.puts cmd+" "+arg[0]
-    puts server.gets
+    case cmd
+    when "quit","exit"
+      exit
+    when "open"
+      if server
+        puts "Already connected to use close first"
+      else
+        begin
+          server=TCPSocket.new(arg[0],arg[1])
+          puts server.gets.chomp!
+        rescue => e
+          puts "Can't connect to #{arg[0]}: #{e.message}"
+        else
+          puts "Connected to #{arg[0]}"
+        end
+      end
+    else
+      puts "Not connected."
+    end
   end
 end

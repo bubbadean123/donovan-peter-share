@@ -1,4 +1,4 @@
-require_relative "./FTP.rb"
+require_relative "./FTPClient.rb"
 class String
   def asplit(delimiter)
     result=[]
