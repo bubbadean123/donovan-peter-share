@@ -72,14 +72,20 @@ while true
           client.puts "230 Login successful."
         when "RETR"
           puts "Retrieving #{arg}"
-          client.puts "150"
+          client.puts "150 Opening ASCII mode connection for #{arg} (#{File.size(arg)} bytes)."
           if File.exist? arg
-            file=File.read(arg)
-            client.puts file
-            client.puts "201 Sent file."
+            file=File.read(arg).gsub("\n","\r\n")
+            $conn.print file
+            client.puts "226 Transfer complete."
+            $conn.close
           else
             client.puts "502 File not found."
           end
+        when "SIZE"
+          client.puts "213 #{File.size(arg)}"
+        when "MDTM"
+          mtime=File.mtime(arg).getutc.strftime("%Y%m%d%H%M%S")
+          client.puts "213 #{mtime}"
         when "LIST"
           puts "Sending directory listing."
           listing=Dir.entries(".")
@@ -87,11 +93,24 @@ while true
           listing.each do |entry|
             unless entry[0]=="."
               puts "Sending entry #{entry.inspect}"
-              client.puts entry
+              $conn.puts entry+"\r"
               puts "Sent entry"
             end
           end
-          client.puts "202 Directory send OK."
+          puts "Sent"
+          client.puts "226 Directory send OK."
+          $conn.close
+          puts "Sent OK"
+        when "PASV"
+          puts "Listening on 1024"
+          puts "Sending pasv message"
+          client.puts "227 Entering Passive Mode (10,0,0,33,4,0)."
+          puts "Sent pasv message"
+          puts "Accepting"
+          $conn=mserv.accept
+          puts "Accepted"
+          puts $conn.inspect
+          puts client.inspect
         when "STOR"
           file=File.open(arg,"w")
           client.puts "301 Send file."
@@ -115,7 +134,7 @@ while true
           puts "Changed"
           client.puts "204 Directory successfully changed."
       	when "PWD"
-      		client.puts "205 Directory:#{Dir.pwd}"
+      		client.puts "257 #{Dir.pwd} is the current directory."
         when "RNF"
           if File.exist? arg
             rnf=arg
@@ -133,6 +152,9 @@ while true
           else
             client.puts "502 File not found."
           end
+        when "QUIT"
+          client.puts "221 Goodbye."
+          client.close
         else
           puts "No such command"
           client.puts "501 Syntax error"
