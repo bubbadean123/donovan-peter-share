@@ -101,10 +101,32 @@ while true
           client.puts "226 Directory send OK."
           $conn.close
           puts "Sent OK"
+        when "PORT"
+          addr=arg.split(",")
+          i=0
+          ip=""
+          port=0
+          addr.each do |val|
+          	puts "Before, i:#{i},val:#{val},ip:#{ip},port:#{port}"
+          	if i<=2
+          		ip+=val+"."
+          	elsif i==3
+          		ip+=val
+            elsif i==4
+            	port+=val.to_i*256
+            elsif i==5
+            	port+=val.to_i
+          	end
+          	i+=1
+          	puts "After, i:#{i},val:#{val},ip:#{ip},port:#{port}"
+          end
+          puts ip
+          puts port
+          puts "Connecting"
+          $conn=TCPSocket.new(ip,port)
+          puts "Connected"
         when "PASV"
-          puts "Listening on 1024"
-          puts "Sending pasv message"
-          client.puts "227 Entering Passive Mode (10,0,0,33,4,0)."
+          addr=arg.split(",")
           puts "Sent pasv message"
           puts "Accepting"
           $conn=mserv.accept
@@ -134,7 +156,7 @@ while true
           puts "Changed"
           client.puts "204 Directory successfully changed."
       	when "PWD"
-      		client.puts "257 #{Dir.pwd} is the current directory."
+      		client.puts "257 \"#{Dir.pwd}\" is the current directory."
         when "RNF"
           if File.exist? arg
             rnf=arg
@@ -155,6 +177,7 @@ while true
         when "QUIT"
           client.puts "221 Goodbye."
           client.close
+          break
         else
           puts "No such command"
           client.puts "501 Syntax error"
