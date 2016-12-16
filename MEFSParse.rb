@@ -1,24 +1,22 @@
 file=File.open("disk.medsk","r")
-sector=file.gets.chomp!
-puts sector.inspect
-(512-sector.length).times do
-  sector+=" "
-end
 i=0
 filename=""
 ext=""
-sector.each_char do |b|
+file.each_char do |b|
   case i
     when 0..31
       unless b==" "
        filename+=b
       end
-    when 32..36
+    when 32..35
       unless b==" "
        ext+=b
       end
-    when 37..61
-     puts "Sector Id byte:#{b.to_i(16)}"
+    when 36..58
+     puts "Sector Id byte:#{b.ord.to_s(16)},i:#{i/3}"
+    when 59
+     puts "Sector Id byte:#{b.ord.to_s(16)}"
+     break
   end
   i+=1
 end

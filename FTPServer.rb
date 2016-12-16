@@ -126,8 +126,9 @@ while true
           $conn=TCPSocket.new(ip,port)
           puts "Connected"
         when "PASV"
-          addr=arg.split(",")
+          addr=local_ip.gsub(".",",")
           puts "Sent pasv message"
+          client.puts "227 Entering Passive Mode (#{addr},4,0)."
           puts "Accepting"
           $conn=mserv.accept
           puts "Accepted"
@@ -135,12 +136,12 @@ while true
           puts client.inspect
         when "STOR"
           file=File.open(arg,"w")
-          client.puts "301 Send file."
+          client.puts "150 Ok to send data."
           done=false
           until done
-            line=client.gets.chomp!
+            line=$conn.gets.chomp!
             puts "Got line:#{line.inspect}"
-            if line=="SENT"
+            if line==nil
             	puts "We're done"
             	done=true
             	next
@@ -148,8 +149,9 @@ while true
           		file.puts line
           	end
           end
-          client.puts "203 Stored."
+          client.puts "226 Transfer complete."
           file.close
+          $conn.close
         when "CWD"
           puts "Changing directory to: #{arg.inspect}"
           Dir.chdir(arg)
