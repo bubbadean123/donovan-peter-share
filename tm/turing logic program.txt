@@ -1,0 +1,81 @@
+0 o * r or
+0 x * r xor
+0 a * r and
+0 n * r not
+0 O * r nor
+0 A * r nand
+0 X * r nxor
+0 _ * r 0
+0 ! * * halt-done
+0 * * * halt-badp
+
+or 0 * r of0
+or 1 * r of1
+or _ * r or
+or * * r 0
+of0 0 * r ow0 
+of0 1 * r ow1
+of1 0 * r ow1
+of1 1 * r ow1
+ow0 * 0 r or
+ow1 * 1 r or
+
+nor 0 * r nof0
+nor 1 * r nof1
+nor _ * r nor
+nor * * r 0
+nof0 0 * r now1 
+nof0 1 * r now0
+nof1 0 * r now0
+nof1 1 * r now0
+now0 * 0 r nor
+now1 * 1 r nor
+
+
+xor 0 * r xf0
+xor 1 * r xf1
+xor _ * r xor
+xor * * r 0
+xf0 0 * r xw0 
+xf0 1 * r xw1
+xf1 0 * r xw1
+xf1 1 * r xw0
+xw0 * 0 r xor
+xw1 * 1 r xor
+
+nxor 0 * r nxf0
+nxor 1 * r nxf1
+nxor _ * r nxor
+nxor * * r 0
+nxf0 0 * r nxw1 
+nxf0 1 * r nxw0
+nxf1 0 * r nxw0
+nxf1 1 * r nxw1
+nxw0 * 0 r nxor
+nxw1 * 1 r nxor
+
+and 0 * r af0
+and 1 * r af1
+and _ * r and
+and * * r 0
+af0 0 * r aw0 
+af0 1 * r aw0
+af1 0 * r aw0
+af1 1 * r aw1
+aw0 * 0 r and
+aw1 * 1 r and
+
+nand 0 * r naf0
+nand 1 * r naf1
+nand _ * r nand
+nand * * r 0
+naf0 0 * r naw1 
+naf0 1 * r naw1
+naf1 0 * r naw1
+naf1 1 * r naw0
+naw0 * 0 r nand
+naw1 * 1 r nand
+
+not 0 1 r not
+not 1 0 r not
+not * * r 0 
