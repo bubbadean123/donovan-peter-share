@@ -1,48 +1,36 @@
-$devices={0=>nil,1=>nil,2=>nil,3=>nil,4=>nil,5=>nil,6=>nil,7=>nil,8=>nil,9=>nil,10=>nil,11=>nil}
-def sendbyte(byte,port=nil)
-  if port==nil
-    puts "Output: #{byte}"
-  else
-    puts "Output on port #{port}: #{byte}"
-  end
-end
-
-def getbyte(port=nil)
-  if port==nil
-    print "Input required: "
-    return gets.chomp!.to_i
-  else
-    print "Input required on port #{port}: "
-    return gets.chomp!.to_i
-  end
-end
-
+$dl={0=>0,1=>1,2=>2,3=>2}
+$dcl={0=>nil,1=>nil,2=>nil,3=>nil}
+$dcll={0=>0,1=>0,2=>0,3=>0}
+$ndp=12
 def connect(port)
-  sendbyte(255,port)
-  sendbyte(0,port)
-  sendbyte(0,port)
-  type=getbyte(port)
-  $devices[port]=type
+	puts "Switching to port #{port}"
+	puts "Command out: 0"
+	connected=gets.chomp!.to_i
+	if connected==0
+		puts "Command out: 1"
+		id=gets.chomp!.to_i
+		dcl1=gets.chomp!.to_i
+		if dcl1==0
+			$dl[port]=id
+			$dcl[port]=nil
+		else
+			$dl[$ndp]=id
+			$dcl[$ndp]=[dcl1,port]
+			$ndp+=1
+	  end
+		$dcll[port]=0
+	end
 end
- 
-def disconnect(port)
-  $devices[port]=nil
+def switchport(port,dcl1)
+	if $dcll[port]==dcl1
+		puts "Switching to port #{port}"
+  else
+		
+	end
 end
-connect(0)
-connect(2)
-connect(3)
-puts $devices
-string=""
-while true
-  character=getbyte(0).chr
-  if character == "\r" or character == "\n"
-    puts string
-    string=""
-  end
-  if character == "\x04"
-    break
-  end
-  string=string+character
-end
-disconnect(0)
-puts $devices
+#connect(0)
+#connect(0)
+puts $dl.inspect
+puts $dcl
+puts $dcll
+puts $ndp

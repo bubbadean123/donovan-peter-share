@@ -1,6 +1,5 @@
-require "drb/drb"
 class CPU
-	def initialize()
+	def initialize(keybd)
 		@a=0
 		@b=0
 		@c=0
@@ -15,6 +14,7 @@ class CPU
 		@mem=Array.new(65536,0)
 		@memmlist=[]
 		@io=Array.new(255,0)
+		@keybd=keybd.split("")
 	end
 
 	def gline(path, line)
@@ -38,6 +38,7 @@ class CPU
 			i=0
 		end
 		jmpop=false
+		string+=op.upcase+"\n"
 		case command.upcase
 			when "EXIT"
 				return
@@ -53,7 +54,7 @@ class CPU
 			when "MVI"
 				operands[1]=operands[1].to_i
 				case operands[0]
-					when "a"
+					when "A"
 						@a=operands[1]
 					when "B"
 						@b=operands[1]
@@ -83,7 +84,7 @@ class CPU
 						when "H"
 							@a=@a+@h
 						when "L"
-							@a=@a+@h
+							@a=@a+@l
 					end
 				if @a==0
 					@zf=1
@@ -92,6 +93,56 @@ class CPU
 					@cf=1
 					@a=0
 				end
+		when "SUB"
+			@zf=0
+			@cf=0
+			case operands[0]
+					when "B"
+						@a=@a-@b
+					when "C"
+						@a=@a-@c
+					when "D"
+						@a=@a-@d
+					when "E"
+						@a=@a-@e
+					when "H"
+						@a=@a-@h
+					when "L"
+						@a=@a-@l
+				end
+			if @a==0
+				@zf=1
+			end
+			if @a>=256
+				@cf=1
+				@a=0
+			end
+		when "CMP"
+			@zf=0
+			@cf=0
+			case operands[0]
+					when "A"
+					string+="A\n"
+					temp=@a-operands[1].to_i
+					when "B"
+						temp=@b-operands[1].to_i
+					when "C"
+						temp=@c-operands[1].to_i
+					when "D"
+						temp=@d-operands[1].to_i
+					when "E"
+						temp=@e-operands[1].to_i
+					when "H"
+						temp=@h-operands[1].to_i
+					when "L"
+						temp=@l-operands[1].to_i
+				end
+			if temp==0
+				@zf=1
+			end
+			if temp>=256
+				@cf=1
+			end
 			when "INR"
 				case operands[0]
 						when "A"
@@ -129,17 +180,39 @@ class CPU
 			when "MOV"
 				instance_variable_set("@"+operands[0].downcase,instance_variable_get("@"+operands[1].downcase))
 			when "OUT"
-				@io[operands[0].to_i]=@a
+				case operands[0].to_i
+				when 0
+					case @mesport
+					when 0
+						print @a.chr
+					end
+			  when 1
+					@mesport=@a
+				end
 			when "IN"
-				@a=@io[operands[0].to_i]
+				case operands[0].to_i
+				when 0
+					case @mesport
+					when 1
+						@a=@keybd.shift
+						if @a==nil
+							@a=0
+					  else
+							@a=@a.ord
+					  end
+					end
+				end
 			when "JMP"
-				jmpop=true
+				jmp=true
 				@pc=operands[0].to_i
+			when "JNZ"
+				jmp=true if @zf==0
+				@pc=operands[0].to_i if @zf==0
 		end
-		unless jmpop
+		unless jmp
 			@pc=@pc+1
 		end
-		jmpop=false
+		jmp=false
 		i=0
 		pr=0
 		string+="A:#{@a}, B:#{@b}, C:#{@c}, D:#{@d}, E:#{@e}, H:#{@h}, L:#{@l}, PC:#{@pc}, SP:#{@sp}, ZF:#{@zf}, CF:#{@cf}"
@@ -166,14 +239,6 @@ class CPU
 		return @pc
 	end
 	
-	def set_io(port,val)
-		@io[port]=val
-	end
-	
-	def get_io(port)
-		return @io[port]
-	end
-	
 	def reset()
 		@a=0
 		@b=0
@@ -186,29 +251,18 @@ class CPU
 		@cf=0
 		@pc=0
 		@sp=0
+  end
+
+	def run(fname)
+		while true
+	  	prog=File.readlines(fname)
+			if prog[@pc]=="HLT"
+				return
+		  else
+				execute(prog[@pc].chomp)
+			end
+		end
 	end
 end
-cpu=CPU.new()
-def startDRb(port,obj)
-	DRb.start_service("druby://localhost:"+port.to_s, obj)	
-end
-startDRb(1024,cpu)
-while true
-	case cpu.pc
-		when 0
-			#cpu.set_io(0,gets.chomp!.to_i)
-			puts cpu.execute("IN 0")
-		when 1
-			puts cpu.execute("MOV B,A")
-	  when 2
-			#cpu.set_io(1,gets.chomp!.to_i)
-			puts cpu.execute("IN 1")
-		when 3
-			puts cpu.execute("ADD B")
-		when 4
-			puts cpu.execute("OUT 2")
-			#puts cpu.get_io(2)
-		when 5
-			puts cpu.execute("JMP 0")
-	end
-end
+cpu=CPU.new("hello")
+cpu.run("echo.txt")
