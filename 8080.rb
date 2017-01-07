@@ -122,7 +122,6 @@ class CPU
 			@cf=0
 			case operands[0]
 					when "A"
-					string+="A\n"
 					temp=@a-operands[1].to_i
 					when "B"
 						temp=@b-operands[1].to_i
@@ -259,10 +258,10 @@ class CPU
 			if prog[@pc]=="HLT"
 				return
 		  else
-				execute(prog[@pc].chomp)
+				puts execute(prog[@pc].chomp)
 			end
 		end
 	end
 end
-cpu=CPU.new("hello")
+cpu=CPU.new("hi")
 cpu.run("echo.txt")
