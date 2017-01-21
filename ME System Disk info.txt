@@ -1,5 +1,5 @@
-Total capacity(unformatted)=800K
-DS,ED
+Total capacity(unformatted)=400K
+DS,HD
 Bytes per sector=256
 Tracks=80(40 per side)
-Sectors per track=40
+Sectors per track=20
