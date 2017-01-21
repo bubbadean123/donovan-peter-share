@@ -18,7 +18,7 @@ end
 cinput=[]
 res=""
 input.each_char do |c|
-	nres=res+=c
+	nres=res+c
 	puts "nres:#{nres},dict=#{dict.inspect}"
 	if dict.keys.include? nres
 		res=nres
@@ -27,7 +27,7 @@ input.each_char do |c|
 		puts "Pushing"
 		cinput.push dict[res]
 		puts "dict[res]=#{dict[res]},res=#{res},cinput=#{cinput.inspect}"
-		dict[nres]=dict.size-1
+		dict[nres]=dict.size
 		res=c
 		puts dict.inspect
 	end
