@@ -13,10 +13,10 @@ until stop
 	if cbyte==256
 		cbyte=0
 		csect+=1
-		if csect==30
+		if csect==20
 			csect=0
 			ctrack+=1
-			if ctrack==80
+			if ctrack==40
 				ctrack=0
 				cside=1
 				if cside==2
