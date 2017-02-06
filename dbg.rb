@@ -59,7 +59,7 @@ prog.each do |l|
   if lineno==prog.length
     break
   end
-  if brkp.include? lineno
+  if brkp.include? lineno.to_s
     stpmode=true
     puts "STOOOP"
   end
