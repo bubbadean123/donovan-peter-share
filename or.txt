@@ -1,0 +1,7 @@
+PORT input
+PORT input1
+PORT output
+GATE or OR
+WIRE input->or
+WIRE input1->or
+WIRE or->output
