@@ -1,4 +1,4 @@
-puts"Welcome to Ruby Text Editor v1.0"
+puts "Welcome to Ruby Text Editor v1.0"
 puts "Name:"
 name=gets.chomp
 doc=File.read(name).split("\n")
