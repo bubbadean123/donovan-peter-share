@@ -5,7 +5,7 @@ class FTP
     control=TCPSocket.new(ip,21)
     if user==nil
       puts control.gets
-      print "Name (10.0.0.17):"
+      print "Name (ip):"
       user=gets.chomp!
       if debug
         puts "USER #{user}"
