@@ -1,52 +1,54 @@
-# Ruby Circuit Simulator
-# Library file
-
-
-# holds a digital value
-# can call listener callbacks when value changes
+#Used for ports of devices
 class Port 
+  include Comparable
+  # Initalizes a new TapeDrive object.
   def initialize(width=1)
     @width = width
     @callbacks = []
     @value = "X"*width
-  end 
+  end
+  # Returns the current value of the port
+  # @return [String]
   def value
     @value
   end
+  # Sets the ports value
+  # @param name [String] New value
+  # @return [void]
   def value=(new_value)
     #set method
-    if @value != new_value then
-      if value.length != @width then
-        raise ArgumentError, "New value is incorrect width"
-      end
-      @value = new_value
-      #send new value to each listener
-      for callback in @callbacks do
-        callback.call(@value)
-      end  
+    if value.length != @width then
+      raise ArgumentError, "New value is incorrect width"
+    end
+    @value = new_value
+    #send new value to each listener
+    @callbacks.each do |callback|
+      callback.call(@value)
     end
   end
-
+  # Adds a callback
+  # @param name [Proc] Callback to add
+  # @return [void]
   def add_callback(&callback)
     #add block to the list
-    p callback
     @callbacks.push(callback)
   end
-
+  # Returns true if all bits are defined
+  # @return [Boolean]
   def is_defined?()
-    #returns true if all bits are defined
-    for bit in (0...@width) do
+    0...@width.each do |bit|
       if @value[bit] == 'X' || @value[bit] == 'Z' then
         return false
       end
     end
     return true
   end
-
+  # Returns the numeric value of the port.
+  # @return [Fixnum]
   def numeric_value()
     numval = 0
     bitvalue = 1
-    for bit in (0...@width) do
+    0...@width.each do |bit|
       if @value[bit] == "1" then
         numval += bitvalue
       end
@@ -54,11 +56,62 @@ class Port
     end
     return numval
   end  
-
+  # Returns the width of the port.
+  # @return [Fixnum]
   def width()
     @width
   end
-
+  
+  def &(other)
+    return AndGate.new(self,other).output
+  end
+  
+  def |(other)
+    return OrGate.new(self,other).output
+  end
+  
+  def +(other)
+    adder=Adder.new(self,other)
+    return adder.sum,adder.carry
+  end
+  
+  def -(other)
+    notb=NotGate.new(other)
+    adder=Adder.new(self,notb.output,true)
+    borrow=NotGate.new(adder.carry)
+    return adder.sum,borrow.output
+  end
+  def !
+    return NotGate.new(self).output
+  end
+   
+  def [](index)
+    if index.class==Fixnum
+      port=Port.new()
+    else
+      port=Port.new(index.size)
+    end
+    self.add_callback { |value| port.value=value[index]}
+    return port
+  end
+  
+  def join(other,last=false)
+    port=Port.new(self.width+other.width)
+    def update_port(last,port,other)
+      if last
+         port.value=other.value+self.value
+      else
+        port.value=self.value+other.value
+      end
+    end
+    self.add_callback {|value| update_port(last,port,other)}
+    other.add_callback {|value| update_port(last,port,other)}
+    return port
+  end
+  
+  def <=>(other)
+    return self.numeric_value<=>other.numeric_value
+  end
 end
 
 class NotGate
@@ -91,20 +144,22 @@ class NotGate
   end
   
   def input_changed(new_value)
-    puts "Input changed to #{new_value}"
+    #called any time the input changes, or when input set
+    #invert each bit in the input
     new_output = @output.value
-    for i in 0...@width do
-      case new_value[i]
-        when "0"
-          new_output[i] = "1"
-        when "1"
-          new_output[i] = "0"
-        else
-          new_output[i] = "X"
+    (0...@width).each do |bit|
+      case new_value[bit]
+      when "0"
+        new_output[bit] = "1"
+      when "1"
+        new_output[bit] = "0"
+      else
+        new_output[bit] = "X"
       end
     end
     @output.value = new_output
   end
+  
 end
 
 class AndGate
@@ -142,22 +197,21 @@ class AndGate
   end
 
   def input_changed(new_value)
-    puts "An input changed to #{new_value}"
     #called any time an input changes, or when input added
     #for each bit loop through all inputs to see if all are True
     new_output = @output.value
-    for bit in 0...@width do
+    (0...@width).each do |bit|
       unknowns = false
       found_zero = false
-      for inp in @inputs do
+      @inputs.each do |inp|
         case inp.value()[bit]
-          when "0"
-            found_zero = true
-            break
-          when "X"
-            unknowns = true
-          when "Z"
-            unknowns = true
+        when "0"
+          found_zero = true
+          break
+        when "X"
+          unknowns = true
+        when "Z"
+          unknowns = true
         end
       end
       if found_zero then
@@ -208,20 +262,20 @@ class OrGate
 
   def input_changed(new_value)
     #called any time an input changes, or when input added
-    #loop through all inputs to see if any are True
+    #for each bit loop through all inputs to see if any are True
     new_output = @output.value
-    for bit in 0...@width do
+    (0...@width).each do |bit|
       unknowns = false
       found_one = false
-      for inp in @inputs do
+      @inputs.each do |inp|
         case inp.value()[bit]
-          when "1"
-            found_one = true
-            break
-          when "X"
-            unknowns = true
-          when "Z"
-            unknowns = true
+        when "1"
+          found_one = true
+          break
+        when "X"
+          unknowns = true
+        when "Z"
+          unknowns = true
         end
       end
       if found_one then
@@ -287,6 +341,109 @@ class Mux
   end
 end
 
+class Adder
+  def initialize(*args)
+    @inputs = []
+    if args.length==0
+      @width=1
+      @sum = Port.new(@width)
+      @carry = Port.new(1)
+      @cin = 0
+    elsif args[0].class==Fixnum
+      @width=args.shift
+      @sum = Port.new(@width)
+      @carry = Port.new(1)
+      add_input(args[0])
+      add_input(args[1])
+      @cin = args[2] #Not a port
+      cin = false if cin == nil
+     else
+      @width=args[0].width
+      @sum = Port.new(@width)
+      @carry = Port.new(1)
+      add_input(args[0])
+      add_input(args[1])
+      @cin = args[2] #Not a port
+      cin = false if cin == nil
+    end
+  end
+
+  def sum
+    return @sum
+  end
+
+  def carry
+    return @carry
+  end
+  
+  def add_input(input_port)
+    if input_port.width != @width then
+      raise ArgumentError, "Incorrect port width"
+    end
+    @inputs.push(input_port)
+    input_port.add_callback {|value| self.input_changed(value)}
+    input_changed(input_port.value)
+  end
+
+  def input_changed(new_value)
+    #called any time an input changes, or when input added
+    #for each bit loop through all inputs to see if any are True
+    new_sum = ""
+    c = ""
+    i=0
+    (0...@width).each do |bit|
+      unknowns = false
+      bits = []
+      @inputs.each do |inp|
+        case inp.value()[bit]
+        when "X"
+          unknowns = true
+        when "Z"
+          unknowns = true
+        else
+          bits.push(inp.value()[bit].to_i)
+        end
+      end
+      if unknowns
+        new_sum[bit] = "X"
+        c = "0"
+      else
+        tot=0
+        puts "Bits:#{bits}"
+        bits.each do |bit|
+          tot+=bit
+        end
+        p tot
+        if c=="1"
+          tot+=1
+          p tot
+        end
+        if @cin and i==0
+          puts "adding 1:#{i}"
+          tot+=1
+          p tot
+        end
+        i+=1
+        puts "Total:#{tot}"
+        bval=tot.to_s(2).split("")
+        bval="#{bval[-2]}#{bval[-1]}"
+        bval=bval.to_s
+        puts "Binary value:#{bval}"
+        if bval.length==2
+          s = bval[1]
+          c = bval[0]
+        else
+          s = bval[0]
+          c = "0"
+        end
+        new_sum = s + new_sum
+      end
+    end
+    @sum.value = new_sum
+    @carry.value = c
+  end
+end
+
 class Reg
   def initialize(wr,data)
     @wr = wr
@@ -317,6 +474,7 @@ class Reg
   end
 end
 
+
 class Dbg
   def initialize(ports)
     @names = []
@@ -333,23 +491,10 @@ class Dbg
     puts watch_str
   end
 end
-=begin
-in1 = Port.new
-in2 = Port.new
-andgate = AndGate.new(in1,in2)
-notgate = NotGate.new(andgate.output)
-dbg=Dbg.new({in1=>"in1",in2=>"in2",notgate.output=>"out"})
-in1.value = "0"
-in2.value = "0"
+in1=Port.new(4)
+in2=Port.new(4)
+difference,borrow=in1-in2
+dbg=Dbg.new(in1=>"in1",in2=>"in2",difference=>"difference",borrow=>"borrow")
+in1.value="1101"
+in2.value="0001"
 dbg.out
-in1.value = "0"
-in2.value = "1"
-dbg.out
-in1.value = "1"
-in2.value = "0"
-dbg.out
-in1.value = "1"
-in2.value = "1"
-dbg.out
-=end
-in=Port.new
