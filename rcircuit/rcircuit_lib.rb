@@ -1,97 +1,100 @@
-#Used for ports of devices
-class Port 
+# Ruby Circuit Simulator
+# Library file
+
+# holds a digital value
+# can call listener callbacks when value changes
+
+require_relative "net"
+
+classes=Object.constants
+classes.each do |c|
+  puts "Before, c=#{c.inspect}"
+  c=Object.const_get(c)
+  puts "After, c=#{c.inspect}"
+  if c.class == Class
+    if c.instance_methods.include? :test
+      puts "Found test method on class:#{c}"
+    end
+  end
+end
+#add some extra functionality to the basic NetPort
+class Port < NetPort
   include Comparable
-  # Initalizes a new TapeDrive object.
-  def initialize(width=1)
-    @width = width
-    @callbacks = []
-    @value = "X"*width
-  end
-  # Returns the current value of the port
-  # @return [String]
-  def value
-    @value
-  end
-  # Sets the ports value
-  # @param name [String] New value
-  # @return [void]
+
+  #override to handle bitstrings
   def value=(new_value)
-    #set method
-    if value.length != @width then
-      raise ArgumentError, "New value is incorrect width"
-    end
-    @value = new_value
-    #send new value to each listener
-    @callbacks.each do |callback|
-      callback.call(@value)
-    end
-  end
-  # Adds a callback
-  # @param name [Proc] Callback to add
-  # @return [void]
-  def add_callback(&callback)
-    #add block to the list
-    @callbacks.push(callback)
-  end
-  # Returns true if all bits are defined
-  # @return [Boolean]
-  def is_defined?()
-    0...@width.each do |bit|
-      if @value[bit] == 'X' || @value[bit] == 'Z' then
-        return false
+    if new_value.class == String
+      if new_value.length != self.width
+        raise ArgumentError, "Wrong width for bitstring: #{new_value}"
       end
-    end
-    return true
-  end
-  # Returns the numeric value of the port.
-  # @return [Fixnum]
-  def numeric_value()
-    numval = 0
-    bitvalue = 1
-    0...@width.each do |bit|
-      if @value[bit] == "1" then
-        numval += bitvalue
+      numval = 0
+      new_value.reverse.each do |bit|
+        numval = numval << 1
+	if bit == "1"
+          numval += 1
+        elsif bit != "0"
+          raise ArgumentError, "String values (#{new_value}) must be binary"
+        end
       end
-      bit_value = bitvalue * 2
+      super(numval)
+    else
+      super(new_value)
     end
-    return numval
-  end  
-  # Returns the width of the port.
-  # @return [Fixnum]
-  def width()
-    @width
   end
-  
+ 
+  def convert_port(otherval)
+    #checks if argument is a port or number
+    #if it is a number, convert it to a contant port
+    if otherval.class == Fixnum
+      return PortConstant.new(self.width, otherval)
+    else
+      return otherval
+    end
+  end
+
   def &(other)
+    other = convert_port(other)
     return AndGate.new(self,other).output
   end
   
   def |(other)
+    other = convert_port(other)
     return OrGate.new(self,other).output
   end
   
-  def +(other)
-    adder=Adder.new(self,other)
-    return adder.sum,adder.carry
+  def ^(other)
+    other = convert_port(other)
+    return XorGate.new(self, other).output
   end
-  
-  def -(other)
-    notb=NotGate.new(other)
-    adder=Adder.new(self,notb.output,true)
-    borrow=NotGate.new(adder.carry)
-    return adder.sum,borrow.output
-  end
+
   def !
     return NotGate.new(self).output
   end
    
+  def +(other)
+    other = convert_port(other)
+    return Adder.new(self.width,{"a"=>self,"b"=>other}).output
+  end
+  
+  def -(other)
+    other = convert_port(other)
+    return Subtractor.new(self.width,{"a"=>self,"b"=>other}).output
+  end
+  
   def [](index)
     if index.class==Fixnum
-      port=Port.new()
+      port=Port.new(1)  #single line
+      mask = 1 << index
+      shift = index
     else
-      port=Port.new(index.size)
+      port=Port.new(index.size) #range
+      mask = (2**(index.size) - 1) << index.first
+      shift = index.first
     end
-    self.add_callback { |value| port.value=value[index]}
+    #copies slice to new port
+    self.add_callback do |new_value| 
+      port.value = (new_value & mask) >> shift
+    end
     return port
   end
   
@@ -99,9 +102,9 @@ class Port
     port=Port.new(self.width+other.width)
     def update_port(last,port,other)
       if last
-         port.value=other.value+self.value
+         port.value=(other.value << self.width) + self.value
       else
-        port.value=self.value+other.value
+        port.value=(self.value << other.width) +other.value
       end
     end
     self.add_callback {|value| update_port(last,port,other)}
@@ -110,60 +113,60 @@ class Port
   end
   
   def <=>(other)
-    return self.numeric_value<=>other.numeric_value
+    other = convert_port(other)
+    return self.value<=>other.value
   end
-end
 
-class NotGate
-  def initialize(*args)
-    if args.length==0
-      @width=1
-      @output = Port.new(@width)
-    elsif args[0].class==Fixnum
-      @width=args.shift
-      @output = Port.new(@width)
-      set_input(args[0])
-     else
-      @width=args[0].width
-      @output = Port.new(@width)
-      set_input(args[0])
-    end
+  def >>(shiftbits)
+    return LSR.new(self.width, shiftbits).inp(self).output
   end
-  
-  def set_input(input_port)
-    if input_port.width != @width then
-      raise ArgumentError, "Incorrect port width"
-    end 
-    @input = input_port
-    input_port.add_callback {|value| self.input_changed(value)}
-    input_changed(input_port.value)
+
+  def <<(shiftbits)
+    return LSL.new(self.width, shiftbits).inp(self).output
   end
-  
-  def output
-    return @output
-  end
-  
-  def input_changed(new_value)
-    #called any time the input changes, or when input set
-    #invert each bit in the input
-    new_output = @output.value
-    (0...@width).each do |bit|
-      case new_value[bit]
-      when "0"
-        new_output[bit] = "1"
-      when "1"
-        new_output[bit] = "0"
-      else
-        new_output[bit] = "X"
+
+  def bitstring
+    if is_defined?
+      mask = 1 << (self.width - 1)
+      strval = ""
+      self.width.times do
+        if (self.value & mask) > 0
+          strval += "1"
+        else
+          strval += "0"
+        end
+        mask = mask >> 1
       end
+      strval
+    else
+      "X"*self.width
     end
-    @output.value = new_output
   end
   
+  def method_missing(m, *args, &block)
+      return self
+  end 
 end
 
-class AndGate
-  def initialize(*args)
+class PortConstant < Port
+  def initialize(width, value)
+    super(width)
+    @assigned = false
+    self.value = value
+    @assigned = true
+  end
+
+  def _update(newvalue)
+    if @assigned
+      #not initial assigment
+      raise RuntimeError, "Cannot change value of constant port"
+    end
+  end
+end
+
+
+class Gate
+  def initialize(*args)  
     @inputs = []
     if args.length==0
       @width=1
@@ -173,209 +176,16 @@ class AndGate
       @output = Port.new(@width)
       args.each do |input|
         add_input(input)
-      end
-     else
-      @width=1
-      @output = Port.new(@width)
-      args.each do |input|
-        add_input(input)
-      end
-    end
-  end
-  
-  def output
-    return @output
-  end
-
-  def add_input(input_port)
-    if input_port.width != @width then
-      raise ArgumentError, "Incorrect port width"
-    end
-    @inputs.push(input_port)
-    input_port.add_callback {|value| self.input_changed(value)}
-    input_changed(input_port.value)
-  end
-
-  def input_changed(new_value)
-    #called any time an input changes, or when input added
-    #for each bit loop through all inputs to see if all are True
-    new_output = @output.value
-    (0...@width).each do |bit|
-      unknowns = false
-      found_zero = false
-      @inputs.each do |inp|
-        case inp.value()[bit]
-        when "0"
-          found_zero = true
-          break
-        when "X"
-          unknowns = true
-        when "Z"
-          unknowns = true
-        end
-      end
-      if found_zero then
-        new_output[bit] = "0"
-      elsif unknowns 
-        new_output[bit] = "X"
-      else 
-        new_output[bit] = "1"
-      end
-    end #end of loop through each bit
-    @output.value=new_output
-  end
-end
-
-class OrGate
-  def initialize(*args)
-    @inputs = []
-    if args.length==0
-      @width=1
-      @output = Port.new(@width)
-    elsif args[0].class==Fixnum
-      @width=args.shift
-      @output = Port.new(@width)
-      args.each do |input|
-        add_input(input)
-      end
-     else
-      @width=args[0].width
-      @output = Port.new(@width)
-      args.each do |input|
-        add_input(input)
-      end
-    end
-  end
-
-  def output
-    return @output
-  end
-
-  def add_input(input_port)
-    if input_port.width != @width then
-      raise ArgumentError, "Incorrect port width"
-    end
-    @inputs.push(input_port)
-    input_port.add_callback {|value| self.input_changed(value)}
-    input_changed(input_port.value)
-  end
-
-  def input_changed(new_value)
-    #called any time an input changes, or when input added
-    #for each bit loop through all inputs to see if any are True
-    new_output = @output.value
-    (0...@width).each do |bit|
-      unknowns = false
-      found_one = false
-      @inputs.each do |inp|
-        case inp.value()[bit]
-        when "1"
-          found_one = true
-          break
-        when "X"
-          unknowns = true
-        when "Z"
-          unknowns = true
-        end
-      end
-      if found_one then
-        new_output[bit] = "1"
-      elsif unknowns
-        new_output[bit] = "X"
-      else
-        new_output[bit] = "0"
-      end
-    end
-    @output.value = new_output
-  end
-end
-
-class Mux
-  def initialize(data_width=1, select_width=1)
-    @data_width = data_width
-    @select_width = select_width
-    @select = nil
-    @inputs = [nil,] * (2**@select_width)
-    @output = Port.new(@data_width)
-  end
-
-  def output
-    return @output
-  end
-  
-  def set_select(port)
-    if port.width != @select_width then
-      raise ArgumentError, "Incorrect port width"
-    end
-    @select = port
-    port.add_callback {|value| self.select_changed(value)}
-    select_changed(port.value)
-  end
-
-  def set_input(port, channel)
-    if port.width != @select_width then
-      raise ArgumentError, "Incorrect port width"
-    end
-    @inputs[channel] = port
-    port.add_callback {|value| self.input_changed(channel, value)}
-    input_changed(channel, input_port.value)
-  end
-
-  def select_changed(value)
-    if @select.is_defined? then
-      new_channel = @select.numeric_value
-      if @inputs[new_channel] == nil then
-        @output.unset
-      else
-        @output.value = @inputs[new_channel].value
       end
     else
-      @output.unset
-    end
-  end
-
-  def input_changed(channel, new_value)
-    if @select.is_defined? && channel == @selct.numeric_value then
-      @output.value = new_value
-    end
-  end
-end
-
-class Adder
-  def initialize(*args)
-    @inputs = []
-    if args.length==0
-      @width=1
-      @sum = Port.new(@width)
-      @carry = Port.new(1)
-      @cin = 0
-    elsif args[0].class==Fixnum
-      @width=args.shift
-      @sum = Port.new(@width)
-      @carry = Port.new(1)
-      add_input(args[0])
-      add_input(args[1])
-      @cin = args[2] #Not a port
-      cin = false if cin == nil
-     else
       @width=args[0].width
-      @sum = Port.new(@width)
-      @carry = Port.new(1)
-      add_input(args[0])
-      add_input(args[1])
-      @cin = args[2] #Not a port
-      cin = false if cin == nil
+      @output = Port.new(@width)
+      args.each do |input|
+        add_input(input)
+      end
     end
   end
 
-  def sum
-    return @sum
-  end
-
-  def carry
-    return @carry
-  end
-  
   def add_input(input_port)
     if input_port.width != @width then
       raise ArgumentError, "Incorrect port width"
@@ -385,101 +195,358 @@ class Adder
     input_changed(input_port.value)
   end
 
-  def input_changed(new_value)
-    #called any time an input changes, or when input added
-    #for each bit loop through all inputs to see if any are True
-    new_sum = ""
-    c = ""
-    i=0
-    (0...@width).each do |bit|
-      unknowns = false
-      bits = []
-      @inputs.each do |inp|
-        case inp.value()[bit]
-        when "X"
-          unknowns = true
-        when "Z"
-          unknowns = true
-        else
-          bits.push(inp.value()[bit].to_i)
-        end
-      end
-      if unknowns
-        new_sum[bit] = "X"
-        c = "0"
-      else
-        tot=0
-        puts "Bits:#{bits}"
-        bits.each do |bit|
-          tot+=bit
-        end
-        p tot
-        if c=="1"
-          tot+=1
-          p tot
-        end
-        if @cin and i==0
-          puts "adding 1:#{i}"
-          tot+=1
-          p tot
-        end
-        i+=1
-        puts "Total:#{tot}"
-        bval=tot.to_s(2).split("")
-        bval="#{bval[-2]}#{bval[-1]}"
-        bval=bval.to_s
-        puts "Binary value:#{bval}"
-        if bval.length==2
-          s = bval[1]
-          c = bval[0]
-        else
-          s = bval[0]
-          c = "0"
-        end
-        new_sum = s + new_sum
-      end
-    end
-    @sum.value = new_sum
-    @carry.value = c
-  end
-end
-
-class Reg
-  def initialize(wr,data)
-    @wr = wr
-    @data = data
-    @wr.add_callback {|value| self.input_changed(@data.value)}
-    @data.add_callback {|value| self.input_changed(@data.value)}
-    @output = Port.new(data.width)
-    @val = nil
-   end
-
   def output
     return @output
   end
 
-  def set_input(input_port)
-    if input_port.width != @width then
-      raise ArgumentError, "Incorrect port width"
-    end
-    @input=input_port
-    input_port.add_callback {|value| self.data_changed(value)}
-    input_changed(input_port.value)
+end
+
+
+class NotGate < Gate
+  def initialize(*args)
+    super
+    @outmask = (2**@width)-1
   end
 
-  def input_changed(data_val)
-    if @wr.value=="1"
-      @output.value = data_val
+  def add_input(input_port)
+    if @inputs.length > 0 then
+      raise ArgumentError, "Cannot add multiple inputs to NotGate"
+    end 
+    super
+  end
+
+  alias set_input add_input
+  
+  def input_changed(new_value)
+    inport=@inputs[0]
+    if inport.is_defined?
+      @output.value = (~inport.value) & @outmask
+    else
+      @output.undefine
+    end
+  end
+  
+end
+
+class AndGate < Gate
+
+  def input_changed(new_value)
+    andval = nil
+    @inputs.each do |inport|
+      if inport.is_defined?
+        if andval == nil
+          andval = inport.value
+        else
+          andval = andval & inport.value
+        end 
+      else
+        @output.undefine
+        return
+      end
+    end
+    @output.value = andval
+  end
+
+end
+
+class OrGate < Gate
+
+  def input_changed(new_value)
+    orval = nil
+    @inputs.each do |inport|
+      if inport.is_defined?
+        if orval == nil
+          orval = inport.value
+        else
+          orval = orval | inport.value
+        end 
+      else
+        @output.undefine
+        return
+      end
+    end
+    @output.value = orval
+  end
+
+end
+
+
+class XorGate < Gate
+
+  def input_changed(new_value)
+    xorval = nil
+    @inputs.each do |inport|
+      if inport.is_defined?
+        if xorval == nil
+          xorval = inport.value
+        else
+          xorval = xorval ^ inport.value
+        end 
+      else
+        @output.undefine
+        return
+      end
+    end
+    @output.value = xorval
+  end
+
+end
+
+
+class Device
+  def define_port(name, width=1, &callback)
+    #create a method with the same name as the input
+    #to assign a port to the input
+    var_name = "@" + name
+    port = Port.new(width)
+    instance_variable_set(var_name, port)
+    define_singleton_method(name) do |other=nil|
+      if other.class == NilClass  #avoids overloaded compare for Port
+        #getter
+        instance_variable_get(var_name)
+      else     
+	#connect to given port
+        if other.class == Fixnum
+          #convert constant
+          other = PortConstant.new(width, other)
+        end
+        instance_variable_get(var_name).connect(other)  
+	self #for chained init calls     
+      end
+    end
+    if block_given?
+      port.add_callback(&callback)
+    end
+    port
+  end
+
+  def define_input(name, width=1)
+    #automatically connects to on_change method
+    define_port(name, width) { |new_value| on_change(new_value) }
+  end
+
+  #call on the hash of arguments at init
+  def init_assign(hash)
+    hash.each do |name, port|
+      #check if there is a defined method (port) that matches
+      if self.respond_to?(name)
+        method(name).call(port)
+      else
+        raise ArgumentError, "No defined input '#{name}'"
+      end      
+    end
+  end
+
+end
+
+#logical shift right
+class LSR < Device
+  def initialize(width, bitshift, init_args={})
+    define_input("inp", width)
+    define_port("output", width)
+    @bitshift = bitshift
+    init_assign(init_args)
+  end
+
+  def on_change(data_val)
+    if @inp.is_defined?
+      @output.value = @inp.value >> @bitshift
+    else
+      @output.undefine
     end
   end
 end
 
+#logical shift left
+class LSL < Device
+  def initialize(width, bitshift, init_args={})
+    define_input("inp", width)
+    define_port("output", width)
+    @bitshift = bitshift
+    @outmask = (2**width) - 1
+    init_assign(init_args)
+  end
+
+  def on_change(data_val)
+    if @inp.is_defined?
+      @output.value = (@inp.value << @bitshift) & @outmask
+    else
+      @output.undefine
+    end
+  end
+end
+
+
+class Reg < Device
+  def initialize(width, init_args={})
+    define_input("data_in", width)
+    define_port("data_out", width)
+    define_input("clk")
+    define_input("en")
+    define_input("rst") 
+    init_assign(init_args)
+  end
+
+  def on_change(data_val)
+    if @rst.value == 1
+      @data_out.value = 0
+    elsif @en.value == 1 && @clk.posedge?
+      @data_out.value = @data_in.value
+    end
+  end
+end
+
+class Counter < Device
+  def initialize(width, init_args={})
+    define_input("count_in", width)
+    define_port("output", width)
+    define_input("clk")
+    define_input("load")
+    define_input("rst") 
+    init_assign(init_args)
+  end
+
+  def on_change(data_val)
+    if @rst.value == "1"
+      @count_out.value = 0
+    elsif @clk.posedge?
+      if @load.value == "1"
+        @count_out.value = @count_in.value
+      else
+        @count_out.value = @count_out.numeric_value + 1
+      end
+    end
+  end
+end
+
+class Mux < Device
+  def initialize(data_width=1, select_width=1, init_args={})
+    num_inputs = 2**select_width
+    i=0
+    @inputs = []
+    num_inputs.times do
+      @inputs << define_input("in"+i.to_s, data_width)
+      i += 1
+    end
+    define_input("sel", select_width)
+    define_port("out", data_width)
+    init_assign(init_args)
+  end
+
+  def on_change(new_value)
+    if sel.is_defined?
+     
+      out.value = @inputs[sel.value].value
+    else
+      out.undefine
+    end
+  end
+end
+   
+
+class Decoder < Device
+  def initialize(width, init_args={})
+    @width=width
+    define_input("sel", width)
+    num_of_outputs=2**width
+    i=0
+    @outputs = []
+    num_of_outputs.times do
+      #create an ordered list of all the outputs
+      @outputs << define_port("o"+i.to_s)
+      i+=1
+    end
+    init_assign(init_args)
+  end
+
+  def on_change(data_val)
+    if sel.is_defined?
+      channel=sel.value
+      i=0
+      (@width**2).times do
+        if i==channel
+          @outputs[i].value=1
+        else
+          @outputs[i].value=0
+        end
+        i+=1
+      end
+    else
+      (@width**2).times do
+        @outputs[i].undefine
+      end
+    end 
+  end
+end
+
+class Adder < Device
+  def initialize(width, init_args)
+    define_input("a", width)
+    define_input("b", width)
+    define_port("output", width)
+    init_assign(init_args)
+    @mask = 2**width - 1
+  end
+
+  def on_change(data_val)
+    if @a.is_defined? && @b.is_defined?
+      @output.value = (@a.value + @b.value) & @mask
+    else
+      @output.undefine
+    end
+  end
+end
+
+class Subtractor < Device
+  def initialize(width, init_args)
+    define_input("a", width)
+    define_input("b", width)
+    define_port("output", width)
+    init_assign(init_args)
+    @mask = 2**width - 1
+  end
+
+  def on_change(data_val)
+    if @a.is_defined? && @b.is_defined?
+      @output.value = (@a.value - @b.value) & @mask
+    else
+      @output.undefine
+    end
+  end
+end
+
+class Ram < Device
+  def initialize(data_width, addr_width, init_args={})
+    @mem=[]
+    define_input("data_in", data_width)
+    define_port("data_out", data_width)
+    define_input("addr", addr_width)
+    define_input("clk")
+    define_input("wr")
+    init_assign(init_args)
+  end
+
+  def set_data(init_array)
+    @mem = init_array
+  end
+
+  def on_change(data_val)
+    if @wr.value == 1 && @clk.posedge?
+      @mem[addr.value]=data_in.value
+      data_out.undefine
+    elsif addr.is_defined? && @mem[addr.value] != nil
+      data_out.value=@mem[addr.value]
+    else
+      data_out.undefine
+    end
+  end
+end
 
 class Dbg
   def initialize(ports)
     @names = []
     @ports = {}
-    ports.each do |port,name|
+    ports.each do |name,port|
       @names.push(name)
       @ports[name] = port
     end
@@ -487,14 +554,7 @@ class Dbg
 
   def out
     watch_str = ""
-    @names.each { |name| watch_str += "#{name}=#{@ports[name].value} " }
+    @names.each { |name| watch_str += "#{name}=#{@ports[name].bitstring}(#{@ports[name].value}) " }
     puts watch_str
   end
 end
-in1=Port.new(4)
-in2=Port.new(4)
-difference,borrow=in1-in2
-dbg=Dbg.new(in1=>"in1",in2=>"in2",difference=>"difference",borrow=>"borrow")
-in1.value="1101"
-in2.value="0001"
-dbg.out

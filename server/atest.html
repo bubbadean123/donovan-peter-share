@@ -12,7 +12,7 @@ function loadDoc(file,id) {
       if (this.status == 401) {
         document.getElementById(id).innerHTML = "This document requires auth!";
     }
-  };
+  }
   xhttp.open("GET", file, true);
   xhttp.send();
 }

@@ -1,3 +1,4 @@
+
 var on = false;
 var code = 0;
 var booted = false;
@@ -8,7 +9,6 @@ var form = document.getElementById('computer');
 var name = "";
 form.log.value="";
 drive="A";
-
 $("#command").keyup(function(event){
 		if(event.keyCode == 13){
 				event.preventDefault();

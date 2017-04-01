@@ -1,10 +1,3 @@
-coins=rand(12..13)
-if coins==12
-	puts "I predict the computer will win"
-else
-	puts "I predict the player will win"
-end
-puts "Welcome to Ruby NIM"
 def makemove(num,who,coins)
 	if who=="p"
 		if num==1
@@ -37,6 +30,13 @@ def makemove(num,who,coins)
 	  end
 	end
 	return coins
+end
+coins=rand(12..13)
+puts "Welcome to Ruby NIM"
+if coins==12
+	puts "I predict the computer will win"
+else
+	puts "I predict the player will win"
 end
 while true
 	print "How many coins do you take?(1-3)"

@@ -61,17 +61,9 @@ class Cup
    @drink=nil
   end
 end
-begin
-  cup = Cup.new(Size::Medium)
-  puts cup.to_s()
-  cup.fill(Drink::Water)
-  puts cup.to_s()
-  cup.empty
-  puts cup.to_s()
-rescue => e
-    backtrace = e.backtrace
-    puts backtrace.shift + ": " + e.message + " (" + e.class.to_s + ")"
-    backtrace.each do |l|
-      puts "    from " + l
-    end
-end
+cup = Cup.new(Size::Medium)
+puts cup.to_s()
+cup.fill(Drink::Water)
+puts cup.to_s()
+cup.empty
+puts cup.to_s()
