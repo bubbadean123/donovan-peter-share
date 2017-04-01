@@ -150,7 +150,7 @@ class Net
     end
   end
 
-  def test
+  def self.test
     a = NetPort.new(4).add_callback { |value| puts "A set to #{value}" }
     b = NetPort.new(4).add_callback { |value| puts "B set to #{value}" }
     c = NetPort.new(4).add_callback { |value| puts "C set to #{value}" }

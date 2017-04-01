@@ -5,18 +5,6 @@
 # can call listener callbacks when value changes
 
 require_relative "net"
-
-classes=Object.constants
-classes.each do |c|
-  puts "Before, c=#{c.inspect}"
-  c=Object.const_get(c)
-  puts "After, c=#{c.inspect}"
-  if c.class == Class
-    if c.instance_methods.include? :test
-      puts "Found test method on class:#{c}"
-    end
-  end
-end
 #add some extra functionality to the basic NetPort
 class Port < NetPort
   include Comparable
@@ -54,31 +42,31 @@ class Port < NetPort
 
   def &(other)
     other = convert_port(other)
-    return AndGate.new(self,other).output
+    return AndGate.new(self,other).out
   end
   
   def |(other)
     other = convert_port(other)
-    return OrGate.new(self,other).output
+    return OrGate.new(self,other).out
   end
   
   def ^(other)
     other = convert_port(other)
-    return XorGate.new(self, other).output
+    return XorGate.new(self, other).out
   end
 
   def !
-    return NotGate.new(self).output
+    return NotGate.new(self).out
   end
    
   def +(other)
     other = convert_port(other)
-    return Adder.new(self.width,{"a"=>self,"b"=>other}).output
+    return Adder.new(self.width,{"a"=>self,"b"=>other}).out
   end
   
   def -(other)
     other = convert_port(other)
-    return Subtractor.new(self.width,{"a"=>self,"b"=>other}).output
+    return Subtractor.new(self.width,{"a"=>self,"b"=>other}).out
   end
   
   def [](index)
@@ -118,11 +106,11 @@ class Port < NetPort
   end
 
   def >>(shiftbits)
-    return LSR.new(self.width, shiftbits).inp(self).output
+    return LSR.new(self.width, shiftbits).in(self).out
   end
 
   def <<(shiftbits)
-    return LSL.new(self.width, shiftbits).inp(self).output
+    return LSL.new(self.width, shiftbits).in(self).out
   end
 
   def bitstring
@@ -170,16 +158,16 @@ class Gate
     @inputs = []
     if args.length==0
       @width=1
-      @output = Port.new(@width)
+      @out = Port.new(@width)
     elsif args[0].class==Fixnum
       @width=args.shift
-      @output = Port.new(@width)
+      @out = Port.new(@width)
       args.each do |input|
         add_input(input)
       end
     else
       @width=args[0].width
-      @output = Port.new(@width)
+      @out = Port.new(@width)
       args.each do |input|
         add_input(input)
       end
@@ -195,8 +183,8 @@ class Gate
     input_changed(input_port.value)
   end
 
-  def output
-    return @output
+  def out
+    return @out
   end
 
 end
@@ -220,12 +208,23 @@ class NotGate < Gate
   def input_changed(new_value)
     inport=@inputs[0]
     if inport.is_defined?
-      @output.value = (~inport.value) & @outmask
+      out.value = (~inport.value) & @outmask
     else
-      @output.undefine
+      out.undefine
     end
   end
   
+  def self.test
+    puts "NOT Test:"
+    nin = Port.new()
+    not_gate = NotGate.new(nin)
+    dbg = Dbg.new( {"in"=>nin, "out"=>not_gate.out})
+    dbg.out
+    nin.value = 0
+    dbg.out
+    nin.value = 1
+    dbg.out
+  end
 end
 
 class AndGate < Gate
@@ -240,13 +239,33 @@ class AndGate < Gate
           andval = andval & inport.value
         end 
       else
-        @output.undefine
+        out.undefine
         return
       end
     end
-    @output.value = andval
+    out.value = andval
   end
-
+  
+  def self.test()
+    puts "AND Test:"
+    in_a = Port.new()
+    in_b = Port.new()
+    and_gate = AndGate.new(in_a, in_b)
+    dbg = Dbg.new( {"a"=>in_a, "b"=>in_b, "out"=>and_gate.out})
+    dbg.out
+    in_a.value=0
+    in_b.value=0
+    dbg.out
+    in_a.value=1
+    in_b.value=0
+    dbg.out
+    in_a.value=0
+    in_b.value=1
+    dbg.out
+    in_a.value=1
+    in_b.value=1
+    dbg.out
+  end
 end
 
 class OrGate < Gate
@@ -261,13 +280,33 @@ class OrGate < Gate
           orval = orval | inport.value
         end 
       else
-        @output.undefine
+        out.undefine
         return
       end
     end
-    @output.value = orval
+    out.value = orval
   end
-
+  
+  def self.test()
+    puts "OR Test:"
+    in_a = Port.new()
+    in_b = Port.new()
+    or_gate = OrGate.new(in_a, in_b)
+    dbg = Dbg.new( {"a"=>in_a, "b"=>in_b, "out"=>or_gate.out})
+    dbg.out
+    in_a.value=0
+    in_b.value=0
+    dbg.out
+    in_a.value=1
+    in_b.value=0
+    dbg.out
+    in_a.value=0
+    in_b.value=1
+    dbg.out
+    in_a.value=1
+    in_b.value=1
+    dbg.out
+  end
 end
 
 
@@ -283,13 +322,33 @@ class XorGate < Gate
           xorval = xorval ^ inport.value
         end 
       else
-        @output.undefine
+        out.undefine
         return
       end
     end
-    @output.value = xorval
+    out.value = xorval
   end
 
+  def self.test()
+    puts "XOR Test:"
+    in_a = Port.new()
+    in_b = Port.new()
+    or_gate = OrGate.new(in_a, in_b)
+    dbg = Dbg.new( {"a"=>in_a, "b"=>in_b, "out"=>or_gate.out})
+    dbg.out
+    in_a.value=0
+    in_b.value=0
+    dbg.out
+    in_a.value=1
+    in_b.value=0
+    dbg.out
+    in_a.value=0
+    in_b.value=1
+    dbg.out
+    in_a.value=1
+    in_b.value=1
+    dbg.out
+  end
 end
 
 
@@ -342,17 +401,17 @@ end
 #logical shift right
 class LSR < Device
   def initialize(width, bitshift, init_args={})
-    define_input("inp", width)
-    define_port("output", width)
+    define_input("in", width)
+    define_port("out", width)
     @bitshift = bitshift
     init_assign(init_args)
   end
 
   def on_change(data_val)
-    if @inp.is_defined?
-      @output.value = @inp.value >> @bitshift
+    if @in.is_defined?
+      out.value = @in.value >> @bitshift
     else
-      @output.undefine
+      out.undefine
     end
   end
 end
@@ -360,18 +419,18 @@ end
 #logical shift left
 class LSL < Device
   def initialize(width, bitshift, init_args={})
-    define_input("inp", width)
-    define_port("output", width)
+    define_input("in", width)
+    define_port("out", width)
     @bitshift = bitshift
     @outmask = (2**width) - 1
     init_assign(init_args)
   end
 
   def on_change(data_val)
-    if @inp.is_defined?
-      @output.value = (@inp.value << @bitshift) & @outmask
+    if @in.is_defined?
+      out.value = (@in.value << @bitshift) & @outmask
     else
-      @output.undefine
+      out.undefine
     end
   end
 end
@@ -379,8 +438,8 @@ end
 
 class Reg < Device
   def initialize(width, init_args={})
-    define_input("data_in", width)
-    define_port("data_out", width)
+    define_input("in", width)
+    define_port("out", width)
     define_input("clk")
     define_input("en")
     define_input("rst") 
@@ -388,18 +447,18 @@ class Reg < Device
   end
 
   def on_change(data_val)
-    if @rst.value == 1
-      @data_out.value = 0
-    elsif @en.value == 1 && @clk.posedge?
-      @data_out.value = @data_in.value
+    if rst.value == 1
+      out.value = 0
+    elsif en.value == 1 && clk.posedge?
+      out.value = @in.value
     end
   end
 end
 
 class Counter < Device
   def initialize(width, init_args={})
-    define_input("count_in", width)
-    define_port("output", width)
+    define_input("in", width)
+    define_port("out", width)
     define_input("clk")
     define_input("load")
     define_input("rst") 
@@ -407,16 +466,46 @@ class Counter < Device
   end
 
   def on_change(data_val)
-    if @rst.value == "1"
-      @count_out.value = 0
-    elsif @clk.posedge?
-      if @load.value == "1"
-        @count_out.value = @count_in.value
+    if rst.value == "1"
+      out.value = 0
+    elsif clk.posedge?
+      if load.value == "1"
+        out.value = @in.value
       else
-        @count_out.value = @count_out.numeric_value + 1
+        out.value = out.numeric_value + 1
       end
     end
   end
+  
+  def self.test
+    puts "Reg Test:"
+    din = Port.new(8)
+    c = Port.new
+    e = Port.new
+    r = Port.new
+    reg = Reg.new(8,{"in"=>din,"clk"=>c,"en"=>e,"rst"=>r})
+    dbg = Dbg.new({"in"=>din, "clk"=>c, "en"=>e, "rst"=>r, "out"=>reg.out})
+    r.value = 1
+    c.value = 0
+    e.value = 0
+    din.value = 23
+    dbg.out
+    r.value = 1
+    dbg.out 
+    r.value = 0
+    dbg.out
+    c.value = 1
+    dbg.out
+    e.value = 1
+    dbg.out
+    c.value = 0
+    dbg.out
+    c.value = 1
+    dbg.out
+    din.value = 37
+    dbg.out
+  end
+    
 end
 
 class Mux < Device
@@ -440,6 +529,22 @@ class Mux < Device
     else
       out.undefine
     end
+  end
+  
+  def self.test
+    puts "Mux test:"
+    select = Port.new(1)
+    a = Port.new(4)
+    b = Port.new(4)
+    mux = Mux.new(4, 1).sel(select).in0(a).in1(b)
+    dbg = Dbg.new({"sel"=>select, "0"=>a, "1"=>b, "out"=>mux.out})
+    a.value = 3
+    b.value = 14
+    dbg.out
+    select.value = 0
+    dbg.out
+    select.value = 1
+    dbg.out
   end
 end
    
@@ -477,22 +582,38 @@ class Decoder < Device
       end
     end 
   end
+  
+  def self.test
+    puts "Decoder Test:"
+    select=Port.new(2)
+    decoder=Decoder.new(2,"sel"=>select)
+    dbg = Dbg.new({"sel"=>select, "0"=>decoder.o0, "1"=>decoder.o1, "2"=>decoder.o2, "3"=>decoder.o3})
+    dbg.out
+    select.value=0
+    dbg.out
+    select.value=1
+    dbg.out
+    select.value=2
+    dbg.out
+    select.value=3
+    dbg.out
+  end
 end
 
 class Adder < Device
   def initialize(width, init_args)
     define_input("a", width)
     define_input("b", width)
-    define_port("output", width)
+    define_port("out", width)
     init_assign(init_args)
     @mask = 2**width - 1
   end
 
   def on_change(data_val)
-    if @a.is_defined? && @b.is_defined?
-      @output.value = (@a.value + @b.value) & @mask
+    if a.is_defined? && b.is_defined?
+      out.value = (a.value + b.value) & @mask
     else
-      @output.undefine
+      out.undefine
     end
   end
 end
@@ -501,16 +622,16 @@ class Subtractor < Device
   def initialize(width, init_args)
     define_input("a", width)
     define_input("b", width)
-    define_port("output", width)
+    define_port("out", width)
     init_assign(init_args)
     @mask = 2**width - 1
   end
 
   def on_change(data_val)
-    if @a.is_defined? && @b.is_defined?
-      @output.value = (@a.value - @b.value) & @mask
+    if a.is_defined? && b.is_defined?
+      out.value = (a.value - b.value) & @mask
     else
-      @output.undefine
+      out.undefine
     end
   end
 end
@@ -518,8 +639,8 @@ end
 class Ram < Device
   def initialize(data_width, addr_width, init_args={})
     @mem=[]
-    define_input("data_in", data_width)
-    define_port("data_out", data_width)
+    define_input("in", data_width)
+    define_port("out", data_width)
     define_input("addr", addr_width)
     define_input("clk")
     define_input("wr")
@@ -531,21 +652,39 @@ class Ram < Device
   end
 
   def on_change(data_val)
-    if @wr.value == 1 && @clk.posedge?
-      @mem[addr.value]=data_in.value
-      data_out.undefine
+    if wr.value == 1 && clk.posedge?
+      @mem[addr.value]=@in.value
+      out.undefine
     elsif addr.is_defined? && @mem[addr.value] != nil
-      data_out.value=@mem[addr.value]
+      out.value=@mem[addr.value]
     else
-      data_out.undefine
+      out.undefine
     end
+  end
+  
+  def self.test
+    puts "RAM test:"
+    din=Port.new(8)
+    addr=Port.new(8)
+    wr=Port.new
+    clk=Port.new
+    ram=Ram.new(8,8,{"in"=>din,"addr"=>addr,"wr"=>wr,"clk"=>clk})
+    dbg=Dbg.new({"in"=>din,"out"=>ram.out,"addr"=>addr,"wr"=>wr,"clk"=>clk})
+    clk.value=0
+    din.value=11
+    addr.value=0
+    wr.value=1
+    clk.value=1
+    dbg.out
+    clk.value=0
   end
 end
 
 class Dbg
-  def initialize(ports)
+  def initialize(ports,show_num=false)
     @names = []
     @ports = {}
+    @show_num=show_num
     ports.each do |name,port|
       @names.push(name)
       @ports[name] = port
@@ -554,7 +693,22 @@ class Dbg
 
   def out
     watch_str = ""
-    @names.each { |name| watch_str += "#{name}=#{@ports[name].bitstring}(#{@ports[name].value}) " }
+    if @show_num
+      @names.each { |name| watch_str += "#{name}=#{@ports[name].value} " }
+    else
+      @names.each { |name| watch_str += "#{name}=#{@ports[name].bitstring} " }
+    end
     puts watch_str
+  end
+end
+
+def test()
+  classes=Object.constants
+  classes.each do |c|
+    c=Object.const_get(c)
+    #puts "c:#{c}"
+    if c.class == Class && c!=Object && c.methods.include?(:test)
+      c.test
+    end
   end
 end
