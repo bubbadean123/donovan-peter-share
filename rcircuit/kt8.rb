@@ -45,7 +45,6 @@ def ALU.test
   dbg.add_trigger("op")
   for i in (0..15) do
     op.value=i
-    #dbg.out
   end
 end
 class Decoder < Device
