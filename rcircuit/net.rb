@@ -60,7 +60,13 @@ class NetPort
   end
 
   def add_callback(&callback)
-    #add block to the list
+    #add block to the list, put at head
+    @callbacks.insert(0, callback)
+    self  #return self for call chaining
+  end
+
+  def add_late_callback(&callback)
+    #add block to the list, put at end to be called last
     @callbacks.push(callback)
     self  #return self for call chaining
   end

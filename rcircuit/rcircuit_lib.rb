@@ -691,6 +691,10 @@ class Dbg
     end
   end
 
+  def add_trigger(port_name)
+    @ports[port_name].add_late_callback { |value| self.out }
+  end
+
   def out
     watch_str = ""
     if @show_num

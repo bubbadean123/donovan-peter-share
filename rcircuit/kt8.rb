@@ -42,9 +42,10 @@ def ALU.test
   dbg=Dbg.new({"a"=>a,"b"=>b,"op"=>op,"out"=>alu.out},true)
   a.value=3
   b.value=10
+  dbg.add_trigger("op")
   for i in (0..15) do
     op.value=i
-    dbg.out
+    #dbg.out
   end
 end
 
@@ -59,7 +60,7 @@ pc = Counter.new(8).clk(clk).rst(rst)
 reg_a = Reg.new(8).clk(clk).rst(rst)
 reg_b = Reg.new(8).clk(clk).rst(rst)
 reg_r = Reg.new(8).clk(clk).rst(rst)
-prog_mem = Ram.new(8, 8).clk(clk).addr(pc.output).wr(0)
+prog_mem = Ram.new(8, 8).clk(clk).addr(pc.out).wr(0)
 data_mem = Ram.new(8, 6).clk(clk)
 alu = ALU.new(8).a(reg_a.out).b(reg_b.out).op(prog_mem.out[0..3]).out(reg_r.in)
 
