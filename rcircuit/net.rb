@@ -60,7 +60,13 @@ class NetPort
   end
 
   def add_callback(&callback)
-    #add block to the list
+    #add block to the list, put at head
+    @callbacks.insert(0, callback)
+    self  #return self for call chaining
+  end
+
+  def add_late_callback(&callback)
+    #add block to the list, put at end to be called last
     @callbacks.push(callback)
     self  #return self for call chaining
   end
@@ -110,6 +116,9 @@ class Net
   end
 
   def drive(new_value)
+    if new_value.class==Port
+      new_value=new_value.value
+    end
     if new_value != nil && (new_value < 0 || new_value > @max_value)
       raise ArgumentError, "Invalid value (#{new_value}) for net"
     end

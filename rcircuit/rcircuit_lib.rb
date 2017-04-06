@@ -48,7 +48,7 @@ class Port < NetPort
   def |(other)
     other = convert_port(other)
     return OrGate.new(self,other).out
-  end
+  end 
   
   def ^(other)
     other = convert_port(other)
@@ -89,10 +89,14 @@ class Port < NetPort
   def join(other,last=false)
     port=Port.new(self.width+other.width)
     def update_port(last,port,other)
-      if last
-         port.value=(other.value << self.width) + self.value
+      if self.is_defined? && other.is_defined?
+        if last
+          port.value=(other.value << self.width) + self.value
+        else
+          port.value=(self.value << other.width)  + other.value
+        end
       else
-        port.value=(self.value << other.width) +other.value
+        port.undefine
       end
     end
     self.add_callback {|value| update_port(last,port,other)}
@@ -466,13 +470,15 @@ class Counter < Device
   end
 
   def on_change(data_val)
-    if rst.value == "1"
+    if rst.value == 1
       out.value = 0
     elsif clk.posedge?
-      if load.value == "1"
+      if load.value == 1
         out.value = @in.value
       else
-        out.value = out.numeric_value + 1
+        puts "Old out:#{out.value}"
+        out.value = out.value + 1
+        puts "New out:#{out.value}"
       end
     end
   end
@@ -658,10 +664,20 @@ class Ram < Device
     elsif addr.is_defined? && @mem[addr.value] != nil
       out.value=@mem[addr.value]
     else
-      out.undefine
+      out.value=0
     end
   end
   
+  def [](addr)
+    return @mem[addr]
+  end
+  def []=(addr,value)
+    if value.class==String
+      @mem[addr]=value.to_i(2)
+    else
+      @mem[addr]=value
+    end
+  end
   def self.test
     puts "RAM test:"
     din=Port.new(8)
@@ -691,6 +707,10 @@ class Dbg
     end
   end
 
+  def add_trigger(port_name)
+    @ports[port_name].add_late_callback { |value| self.out }
+  end
+
   def out
     watch_str = ""
     if @show_num
@@ -706,7 +726,6 @@ def test()
   classes=Object.constants
   classes.each do |c|
     c=Object.const_get(c)
-    #puts "c:#{c}"
     if c.class == Class && c!=Object && c.methods.include?(:test)
       c.test
     end
