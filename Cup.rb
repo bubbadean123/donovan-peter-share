@@ -45,19 +45,19 @@ class Cup
   end
   
   def fill(drink)
-    unless Drink.values.include? drink
-      raise ArgumentError, "#{drink} is not a valid drink"
-    end
     if drink.class == NilClass
-      raise TypeError, "drink can't be of type " + drink.class.to_s + ". Use empty() instead."
+      raise TypeError, "drink can't be of type " + drink.class.to_s + ". Use empty instead."
     end
     if drink.class != String
       raise TypeError, "drink can't be of type " + drink.class.to_s
     end
+    unless Drink.values.include? drink
+      raise ArgumentError, "#{drink} is not a valid drink"
+    end
     @drink=drink
   end
   
-  def empty()
+  def empty
    @drink=nil
   end
 end
