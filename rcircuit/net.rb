@@ -139,6 +139,7 @@ class Net
         @posedge = false
         @negedge = false
       end
+      @waiting=[]
     end
   end
   def self.do_prop_all
