@@ -171,9 +171,7 @@ cclk.value=1
 dbg.out
 cclk.value=0
 dbg.out
-while true
-  puts "Doing"
-  Net.do_prop_all
-end
+puts "Doing"
+Net.do_prop_all
 puts "Putting.."
 puts data_mem[1].inspect
