@@ -1,5 +1,4 @@
 require 'set'
-
 #endpoints for nets
 class NetPort
 
@@ -21,7 +20,11 @@ class NetPort
   def value
     Net.get_net(self).value
   end
-
+  def bvalue
+    unless Net.get_net(self).value==nil
+      Net.get_net(self).value.to_s(2)
+    end
+  end
   def width
     Net.get_net(self).width
   end
@@ -75,11 +78,11 @@ end
 
 class Net
   @@assignments = {} #table of nets assigned to ports
-  
   def initialize(port, width=1)
     if @@assignments.has_key?(port)
       raise ArgumentError, "Repeat assignment of port to new net"
     end
+    @waiting=[]
     @ports = Set.new
     @ports.add(port)
     @width = width
@@ -116,24 +119,34 @@ class Net
   end
 
   def drive(new_value)
-    if new_value.class==Port
-      new_value=new_value.value
-    end
-    if new_value != nil && (new_value < 0 || new_value > @max_value)
-      raise ArgumentError, "Invalid value (#{new_value}) for net"
-    end
-    if new_value != @value
-      #changed
-      @posedge = (@value == 0 && new_value != nil && new_value > 0)
-      @negedge = (@value != nil && @value > 0 && new_value == 0)
-      @value = new_value
-      @ports.each { |driven| driven._update(new_value) }
-      #edges only last for the current update
-      @posedge = false
-      @negedge = false
-     end
+    @waiting.push(new_value)
   end
-
+  def do_prop
+    @waiting.each do |new_value|
+      if new_value.class==Port
+        new_value=new_value.value
+      end
+      if new_value != nil && (new_value < 0 || new_value > @max_value)
+        raise ArgumentError, "Invalid value (#{new_value}) for net"
+      end
+      if new_value != @value
+        #changed
+        @posedge = (@value == 0 && new_value != nil && new_value > 0)
+        @negedge = (@value != nil && @value > 0 && new_value == 0)
+        @value = new_value
+        @ports.each { |driven| driven._update(new_value) }
+        #edges only last for the current update
+        @posedge = false
+        @negedge = false
+      end
+    end
+  end
+  def self.do_prop_all
+    ObjectSpace.each_object(self).to_a.each do |inst|
+      puts "Propagating for instance #{inst}"
+      inst.do_prop
+    end
+  end
   def value
     @value
   end
@@ -177,7 +190,6 @@ class Net
     d.value = 4
   end
 end
-
 
  
 

@@ -69,7 +69,7 @@ class Port < NetPort
     return Subtractor.new(self.width,{"a"=>self,"b"=>other}).out
   end
   
-  def [](index)
+  def slice(index)
     if index.class==Fixnum
       port=Port.new(1)  #single line
       mask = 1 << index
@@ -151,7 +151,7 @@ class PortConstant < Port
   def _update(newvalue)
     if @assigned
       #not initial assigment
-      raise RuntimeError, "Cannot change value of constant port"
+      #raise RuntimeError, "Cannot change value of constant port"
     end
   end
 end
@@ -476,9 +476,7 @@ class Counter < Device
       if load.value == 1
         out.value = @in.value
       else
-        puts "Old out:#{out.value}"
         out.value = out.value + 1
-        puts "New out:#{out.value}"
       end
     end
   end

@@ -61,45 +61,47 @@ class Decoder < Device
     ren.value=0
     wr.value=0
     rbsel.value=0
+    @ins5to7=ins.slice(5..7)
+    @ins4to7=ins.slice(4..7)
   end
   def on_change(new_val)
-    puts "ins:#{ins.value}"
-    if ins[5..7]=="000"
+    puts "ins:#{ins.bvalue}"
+    if @ins5to7.bvalue=="000"
       aen.value=1
       ben.value=0
       ren.value=0
       wr.value=0
       rbsel.value=0
     end
-    if ins[5..7]=="001"
+    if @ins5to7.bvalue=="001"
       aen.value=0
       ben.value=1
       ren.value=0
       wr.value=0
       rbsel.value=0
     end
-    if ins[5..7]=="010"
+    if @ins5to7.bvalue=="010"
       aen.value=0
       ben.value=0
       ren.value=0
       wr.value=1
       rbsel.value=0
     end
-    if ins[4..7]=="0110"
+    if @ins4to7.bvalue=="0110"
       aen.value=0
       ben.value=0
       ren.value=0
       wr.value=0
       rbsel.value=1
     end
-    if ins[4..7]=="0111"
+    if @ins4to7.bvalue=="0111"
       aen.value=0
       ben.value=0
       ren.value=0
       wr.value=0
       rbsel.value=2
     end
-    if ins[4..7]=="1000"
+    if @ins4to7.bvalue=="1000"
       aen.value=0
       ben.value=0
       ren.value=1
@@ -117,6 +119,7 @@ end
 class KT8 < Device
  def initialize(init_args={})
   define_port("clk")
+  define_port("cclk")
   define_port("rst")
   define_port("dout",8)
   define_port("ins",8)
@@ -127,32 +130,33 @@ class KT8 < Device
   define_port("din",8)
   dec = Decoder.new().ins(ins)
   wr.connect(dec.wr)
-  pc = Counter.new(8).clk(clk).rst(rst).load(0)
+  pc = Counter.new(8).clk(cclk).rst(rst).load(0)
   paddr.connect(pc.out)
   reg_a = Reg.new(8).clk(clk).rst(rst).en(dec.aen)
   reg_b = Reg.new(8).clk(clk).rst(rst).en(dec.ben)
   reg_r = Reg.new(8).clk(clk).rst(rst).en(dec.ren)
-  alu = ALU.new(8).a(reg_a.out).b(reg_b.out).op(ins[0..3]).out(reg_r.in)
-  daddr.connect(ins[0..4])
+  alu = ALU.new(8).a(reg_a.out).b(reg_b.out).op(ins.slice(0..3)).out(reg_r.in)
+  daddr.connect(ins.slice(0..4))
   din.connect(reg_r.out)
   #reg A input is always from data memory
   reg_a.in(dout)
   wr.connect(wr)
   #reg B can be from memory or current value combined with immediate bits
-  low_bit_combine = reg_b.out[4..7].join(ins[0..3])
-  high_bit_combine = ins.out[0..3].join(reg_b.out[0..3])
+  low_bit_combine = reg_b.out.slice(4..7).join(ins.slice(0..3))
+  high_bit_combine = ins.out.slice(0..3).join(reg_b.out.slice(0..3))
   reg_b_source = Mux.new(8,2).in0(dout).in1(low_bit_combine).in2(high_bit_combine).sel(dec.rbsel)
   reg_b.in(reg_b_source.out)
   end
 end
 clk=Port.new
+cclk=Port.new
 rst=Port.new
 prog_mem=Ram.new(8,8)
 data_mem=Ram.new(8,5)
-kt8=KT8.new("clk"=>clk,"rst"=>rst,"dout"=>data_mem.out,"ins"=>prog_mem.out)
+kt8=KT8.new("clk"=>clk,"cclk"=>cclk,"rst"=>rst,"dout"=>data_mem.out,"ins"=>prog_mem.out)
 prog_mem.addr(kt8.paddr).clk(clk).wr(0).in(0)
 data_mem.addr(kt8.daddr).clk(clk).wr(kt8.wr).in(kt8.din)
-dbg=Dbg.new("daddr"=>kt8.daddr,"in"=>kt8.din)
+dbg=Dbg.new("paddr"=>kt8.paddr,"ins"=>kt8.ins)
 prog_mem[0]="00000000"
 prog_mem[1]="10000111"
 prog_mem[2]="01000001"
@@ -163,14 +167,13 @@ dbg.out
 clk.value=1
 dbg.out
 clk.value=0
+cclk.value=1
 dbg.out
-clk.value=1
+cclk.value=0
 dbg.out
-clk.value=0
-dbg.out
-clk.value=1
-dbg.out
-clk.value=0
-dbg.out
+while true
+  puts "Doing"
+  Net.do_prop_all
+end
 puts "Putting.."
 puts data_mem[1].inspect
