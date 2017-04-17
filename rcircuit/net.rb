@@ -78,11 +78,13 @@ end
 
 class Net
   @@assignments = {} #table of nets assigned to ports
+  @@propagate_list = [] #nets that have changed during propagate call
+  @@propagate_flag = false
+
   def initialize(port, width=1)
     if @@assignments.has_key?(port)
       raise ArgumentError, "Repeat assignment of port to new net"
     end
-    @waiting=[]
     @ports = Set.new
     @ports.add(port)
     @width = width
@@ -119,35 +121,50 @@ class Net
   end
 
   def drive(new_value)
-    @waiting.push(new_value)
+    if new_value.is_a?(NetPort)
+      new_value=new_value.value
+    end
+    if new_value != nil && (new_value < 0 || new_value > @max_value)
+      raise ArgumentError, "Invalid value (#{new_value}) for net"
+    end
+    if new_value != @value
+      @new_value = new_value
+      @@propagate_list.push(self) #schedule to run update
+      if not @@propagate_flag
+        #automatically propagate the change and all changes that result
+        @@propagate_flag = true #prevent recursion
+        Net.propagate
+        @@propagate_flag = false  #unlock for next time
+      end
+    end   
   end
-  def do_prop
-    @waiting.each do |new_value|
-      if new_value.class==Port
-        new_value=new_value.value
+
+  #loops until all updates complete
+  def self.propagate
+    loop_check_set = Set.new
+    #keep running until nothing more to update
+    while @@propagate_list.length > 0 do
+      net = @@propagate_list.shift
+      #check if we have already propagated this one
+      #and we are stuck in a loop
+      if loop_check_set.include?(net)
+        raise RuntimeError, "Signal loop detected"
       end
-      if new_value != nil && (new_value < 0 || new_value > @max_value)
-        raise ArgumentError, "Invalid value (#{new_value}) for net"
-      end
-      if new_value != @value
-        #changed
-        @posedge = (@value == 0 && new_value != nil && new_value > 0)
-        @negedge = (@value != nil && @value > 0 && new_value == 0)
-        @value = new_value
-        @ports.each { |driven| driven._update(new_value) }
-        #edges only last for the current update
-        @posedge = false
-        @negedge = false
-      end
-      @waiting=[]
+      loop_check_set.add(net)
+      net.update
     end
   end
-  def self.do_prop_all
-    ObjectSpace.each_object(self).to_a.each do |inst|
-      puts "Propagating for instance #{inst}"
-      inst.do_prop
-    end
+
+  def update
+    @posedge = (@value == 0 && @new_value != nil && @new_value > 0)
+    @negedge = (@value != nil && @value > 0 && @new_value == 0)
+    @value = @new_value
+    @ports.each { |driven| driven._update(@new_value) }
+    #edges only last for the current update
+    @posedge = false
+    @negedge = false
   end
+
   def value
     @value
   end
@@ -192,6 +209,5 @@ class Net
   end
 end
 
- 
-
   
+
