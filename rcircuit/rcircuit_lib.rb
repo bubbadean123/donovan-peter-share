@@ -470,13 +470,21 @@ class Counter < Device
   end
 
   def on_change(data_val)
+    #puts "on_change, clk=#{clk.value}, rst=#{rst.value}"
+    if out.undefined?
+      out.value=0
+    end
     if rst.value == 1
+      #puts "resetting"
       out.value = 0
     elsif clk.posedge?
+      #puts "posedge"
       if load.value == 1
         out.value = @in.value
       else
+        #puts "no load, old out=#{out.value}"
         out.value = out.value + 1
+        #puts "new out=#{out.value}"
       end
     end
   end
@@ -557,6 +565,7 @@ class Decoder < Device
   def initialize(width, init_args={})
     @width=width
     define_input("sel", width)
+    define_input("en")
     num_of_outputs=2**width
     i=0
     @outputs = []
@@ -569,22 +578,32 @@ class Decoder < Device
   end
 
   def on_change(data_val)
-    if sel.is_defined?
-      channel=sel.value
-      i=0
-      (@width**2).times do
-        if i==channel
-          @outputs[i].value=1
-        else
-          @outputs[i].value=0
+    if en
+      if sel.is_defined?
+        channel=sel.value
+        i=0
+        (@width**2).times do
+          if i==channel
+            @outputs[i].value=1
+          else
+            @outputs[i].value=0
+          end
+          i+=1
         end
-        i+=1
+      else
+        i=0
+        (@width**2).times do
+          @outputs[i].undefine
+          i+=1
+        end
       end
     else
+      i=0
       (@width**2).times do
-        @outputs[i].undefine
+        @outputs[i].value=0
+        i+=1
       end
-    end 
+    end
   end
   
   def self.test

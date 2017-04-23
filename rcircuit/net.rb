@@ -148,7 +148,8 @@ class Net
       #check if we have already propagated this one
       #and we are stuck in a loop
       if loop_check_set.include?(net)
-        raise RuntimeError, "Signal loop detected"
+        #raise RuntimeError, "Signal loop detected"
+        #@@propagate_list=[]
       end
       loop_check_set.add(net)
       net.update

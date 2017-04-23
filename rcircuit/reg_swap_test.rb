@@ -24,12 +24,15 @@ rst.value = 0
 reg_en.value = 1
 init_val.value = 1 
 sel.value = 1
+puts "Loading 1 into A"
 clk.value = 1  #loads 1 into A
 dbg.out
 init_val.value = 2
 clk.value = 0
+puts "Loading 2 into A, 1 into B"
 clk.value = 1  #loads 2 into A, 1 into B
 dbg.out
+puts "Swapping A<->B"
 sel.value = 0  #set to swap A <-> B
 clk.value = 0
 clk.value = 1
