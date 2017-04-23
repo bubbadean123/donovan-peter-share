@@ -43,4 +43,3 @@ dbg.out
 clk.value = 0
 clk.value = 1
 dbg.out
-

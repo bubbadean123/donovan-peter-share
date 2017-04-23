@@ -208,7 +208,4 @@ class Net
     a.value = 3 
     d.value = 4
   end
-end
-
-  
-
+end 
