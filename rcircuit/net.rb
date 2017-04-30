@@ -52,7 +52,7 @@ class NetPort
   #called by Net, do not call directly 
   def _update(value)
     if @updating
-      raise RuntimeError, "Signal loop detected"
+      raise RuntimeError, "Signal loop detected in #{self.get_name}"
     end
     @updating = true
     #send new value to each listener
@@ -72,6 +72,25 @@ class NetPort
     #add block to the list, put at end to be called last
     @callbacks.push(callback)
     self  #return self for call chaining
+  end
+
+  def set_name(name)
+    @name = name
+  end
+
+  def set_parent(parent)
+    @parent = parent
+  end
+
+  def get_name
+    if @name == nil
+      @name = self.class
+    end
+    if @parent != nil
+      @parent.get_name + "." + @name
+    else
+      @name
+    end 
   end
 
 end

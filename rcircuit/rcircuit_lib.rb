@@ -362,6 +362,8 @@ class Device
     #to assign a port to the input
     var_name = "@" + name
     port = Port.new(width)
+    port.set_name(name)
+    port.set_parent(self)
     instance_variable_set(var_name, port)
     define_singleton_method(name) do |other=nil|
       if other.class == NilClass  #avoids overloaded compare for Port
@@ -388,6 +390,15 @@ class Device
     define_port(name, width) { |new_value| on_change(new_value) }
   end
 
+  #for contained subdevices
+  def define_device(name, device)
+    var_name = "@" + name
+    instance_variable_set(var_name, device)
+    define_singleton_method(name) { instance_variable_get(var_name) }
+    device.set_parent(self)
+    device.set_name(name)
+  end
+
   #call on the hash of arguments at init
   def init_assign(hash)
     hash.each do |name, port|
@@ -398,6 +409,25 @@ class Device
         raise ArgumentError, "No defined input '#{name}'"
       end      
     end
+  end
+
+  def set_name(name)
+    @name = name
+  end
+
+  def set_parent(parent)
+    @parent = parent
+  end
+
+  def get_name
+    if @name == nil
+      @name = self.class
+    end
+    if @parent != nil
+      @parent.get_name + "." + @name
+    else
+      @name
+    end 
   end
 
 end
