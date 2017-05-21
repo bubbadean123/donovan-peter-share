@@ -97,12 +97,12 @@ class Repo
     f.close 
     return commit 
   end
-  def head()
+  def ghead()
     f=File.open("#{@dir}/HEAD","r")
     mhead=f.gets.chomp!
     return mhead
   end
-  def head=(nhead)
+  def shead(nhead)
     f=File.open("#{@dir}/HEAD","w")
     f.puts nhead
     f.close
@@ -114,11 +114,11 @@ class Repo
     end
     tree=new_tree(wdir)
     commit=new_commit(tree,message,parent)
-    update_ref("#{head}",commit)
+    update_ref("#{ghead}",commit)
     return commit
   end
   def branch(name)
-    update_ref("heads/#{name}",read_ref(head))
+    update_ref("heads/#{name}",read_ref(ghead))
   end
   def branches()
     listing=Dir.entries("#{@dir}/refs/heads")
@@ -129,7 +129,7 @@ class Repo
   end
   def checkout(name)
     if File.exists? "#{@dir}/refs/heads/#{name}"
-      head=("heads/#{name}")
+      shead("heads/#{name}")
     else
       raise BranchError,"Branch #{name} does not exist"
     end
@@ -140,7 +140,7 @@ class Repo
   end
 end
 def log(repo)
-  commit=repo.read_ref(repo.head)
+  commit=repo.read_ref(repo.ghead)
   branches=repo.branches
   while true do
     print "("
@@ -153,7 +153,7 @@ def log(repo)
         else
           hprinted=true
         end
-        if "heads/#{branch}"==repo.head
+        if "heads/#{branch}"==repo.ghead
           print "*"
         end
         print branch
@@ -168,13 +168,18 @@ def log(repo)
     end
   end
 end
+
 FileUtils.rm_r "repo"
 repo=Repo.new("repo")
 icommit=repo.commit({"hello.txt"=>"hello","hi.txt"=>"hi"},"Initial commit")
+puts "Created initial commit:"
 log(repo)
 repo.branch("release")
+puts "Created branch release:"
 log(repo)
 repo.checkout("release")
+puts "Checked out branch release:"
 log(repo)
 rcommit=repo.commit({"hello.txt"=>"hello","hi.txt"=>"hi","version.txt"=>"1.0"},"Release commit",icommit)
+puts "Created release commit:"
 log(repo)
