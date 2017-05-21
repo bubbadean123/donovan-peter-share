@@ -1,141 +1,180 @@
-require "yaml"
-class Repository
-  def initialize(path)
-    @dir=path
-    if !File.exists? @dir
-      Dir.mkdir(@dir)
+require "digest/sha1"
+require "fileutils"
+class BranchError < StandardError
+end
+class Repo
+  def initialize(folder)  
+    if !File.exists? folder
+      Dir.mkdir(folder)
+      Dir.mkdir("#{folder}/objects")
+      Dir.mkdir("#{folder}/refs")
+      Dir.mkdir("#{folder}/refs/heads")
+      Dir.mkdir("#{folder}/refs/tags")
+      f=File.open("#{folder}/HEAD","w")
+      f.puts "heads/master"
+      f.close
     end
-    Dir.chdir(@dir)
-    if File.exists? "vcs.db"
-      hash=YAML.load(File.read("vcs.db"))
-      if hash
-        @commits=hash["commits"]
-        @cid=hash["cid"]
-        @last=hash["last"]
-        return
-      end
-    end
-    f=File.open("vcs.db","w")
-    f.close
-    @commits={}
-    @cid=0
-    @last=nil
+    @dir=folder
   end
-  def commit(message)  
-    entries=Dir.entries(".")
-    entries=entries.delete(".").delete("..")
-    hash={"message"=>message,"flist"=>entries,"parent"=>@last,"changed"=>chfiles}
-    @commits[@cid]=hash
-    @last=@cid
-    @cid+=1
-    save()
-  end
-  def log(id=nil)
-    if id==nil
-      id=@last    
+  def new_obj(type,contents)
+    hash=sha1(contents)
+    if !File.exists? "#{@dir}/objects/#{hash}"
+      f=File.open("#{@dir}/objects/#{hash}","w")
+      f.puts "#{type}\n"+contents
+      f.close
     end
-    commit=@commits[id]
-    if commit["parent"]
-      parent=@commits[commit["parent"]]
-    end
-    cfiles=commit["changed"].keys
-    clist=commit["flist"]
-    message=commit["message"]
-    puts message+":"
-    if parent
-      plist=parent["flist"]
-      plist.each do |name|
-        if cfiles.include? name
-          puts "M #{name}"
-        end
-        if !clist.include? name
-          puts "- #{name}"
-        end
-      end
-      clist.each do |name|
-        if !plist.include? name
-          puts "+ #{name}"
-        end
-      end
-    else
-      cfiles.each do |name|
-        puts "+ #{name}"
-      end
-      return
-    end
-    log(id-1)
-  end
-  private
-  def chfiles()
-    commit=@commits[@last]
-    if !commit
-      return wdirtoh
-    end
-    flist=commit["flist"]
-    cfiles=commit["changed"]
-    chfiles={}
-    wdirtoh.each do |name,contents|
-      ccont=cfiles[name]
-      if !flist.include? name
-        chfiles[name]=contents
-      end
-      if ccont
-        if ccont != contents
-          chfiles[name]=contents
-        end
-      end
-    end
-    return cfiles
-  end
-  def wdirtoh()
-    hash={}
-    vignore=File.read("vignore").split("\n")
-    Dir.foreach(".") do |name|
-      if name == '.' or name == '..' or name == "vcs.db" or vignore.include? name
-        puts "Ignoring #{name}"
-        next
-      end
-      puts "Adding #{name}"
-      hash[name]=File.read(name)
-    end
-    puts "Final hash:#{hash}"
     return hash
   end
-  def save()
-    yaml=YAML.dump({"commits"=>@commits,"cid"=>@cid,"last"=>@last})
-    file=File.open("vcs.db","w")
-    file.puts(yaml)
-    file.close()
+  def new_blob(contents)
+    return new_obj("blob",contents)
+  end
+  def new_tree(tree)
+    string=""
+    tree.each do |name,hash|
+      string+="#{hash} #{name}\n"
+    end
+    return new_obj("tree",string)
+  end
+  def new_commit(tree,message,parent=nil)
+    if parent
+      hash=new_obj("commit","tree:#{tree}\nparent:#{parent}\nmessage:#{message}")
+    else
+      hash=new_obj("commit","tree:#{tree}\nmessage:#{message}")
+    end
+    return hash
+  end
+  def commit_parent(hash)
+    commit=rd_obj(hash).split("\n")
+    chash={}
+    commit.each do |line|
+      sline=line.split(":")
+      chash[sline[0]]=sline[1]
+    end
+    commit=chash
+    return commit["parent"]
+  end
+  def commit_message(hash)
+    commit=rd_obj(hash).split("\n")
+    chash={}
+    commit.each do |line|
+      sline=line.split(":")
+      chash[sline[0]]=sline[1]
+    end
+    commit=chash
+    return commit["message"]
+  end
+  def obj_type(hash)
+    f=File.open("#{@dir}/objects/#{hash}","r")
+    type=f.gets.chomp!
+    f.close
+    return type
+  end
+  def ls_objs()
+    objs={}
+    listing=Dir.entries("#{@dir}/objects")
+    listing.each do |hash|
+      unless hash == "." or hash == ".." or hash == ".DS_Store"
+        objs[hash]=obj_type(hash)
+      end
+    end
+    return objs
+  end
+  def rd_obj(hash)
+    f=File.open("#{@dir}/objects/#{hash}","r")
+    contents=f.readlines
+    contents=contents[1..contents.length-1].join("")
+    f.close
+    return contents
+  end
+  def update_ref(name,commit)
+    f=File.open("#{@dir}/refs/#{name}","w")
+    f.puts commit
+    f.close
+  end
+  def read_ref(name)
+    f=File.open("#{@dir}/refs/#{name}","r")
+    commit=f.gets.chomp!
+    f.close 
+    return commit 
+  end
+  def head()
+    f=File.open("#{@dir}/HEAD","r")
+    mhead=f.gets.chomp!
+    return mhead
+  end
+  def head=(nhead)
+    f=File.open("#{@dir}/HEAD","w")
+    f.puts nhead
+    f.close
+  end
+  def commit(wdir,message,parent=nil)
+    wdir.each do |name,contents|
+      blob=new_blob(contents)
+      wdir[name]=blob
+    end
+    tree=new_tree(wdir)
+    commit=new_commit(tree,message,parent)
+    update_ref("#{head}",commit)
+    return commit
+  end
+  def branch(name)
+    update_ref("heads/#{name}",read_ref(head))
+  end
+  def branches()
+    listing=Dir.entries("#{@dir}/refs/heads")
+    listing.delete(".")
+    listing.delete("..")
+    listing.delete(".DS_Store")
+    return listing
+  end
+  def checkout(name)
+    if File.exists? "#{@dir}/refs/heads/#{name}"
+      head=("heads/#{name}")
+    else
+      raise BranchError,"Branch #{name} does not exist"
+    end
+  end
+  private
+  def sha1(text)
+    return Digest::SHA1.hexdigest(text)
   end
 end
-puts "VCS v1.0 Console"
-open=false
-repo=nil
-while true do
-  print ">"
-  cmd=gets.chomp!.split(" ")
-  op=cmd.shift
-  case op
-  when "help"
-    puts "Command reference:"
-    puts "help-Prints this command reference"
-    puts "open <name>-Opens a repository"
-    puts "commit <message>-Commit all changes"
-    puts "log-Show the commit log"
-  when "open"
-    open=true
-    repo=Repository.new(cmd[0])
-  when "commit"
-    if open
-      repo.commit(cmd.join(" "))
-    else
-      puts "You must open a repository to use this command!"
+def log(repo)
+  commit=repo.read_ref(repo.head)
+  branches=repo.branches
+  while true do
+    print "("
+    i=0
+    hprinted=false
+    branches.each do |branch|
+      if repo.read_ref("heads/#{branch}")==commit
+        if hprinted
+          print ","
+        else
+          hprinted=true
+        end
+        if "heads/#{branch}"==repo.head
+          print "*"
+        end
+        print branch
+      end
+      i+=1
     end
-  when "log"
-    if open
-      repo.log
-    else
-      puts "You must open a repository to use this command!"
+    print ") "
+    puts repo.commit_message(commit)
+    commit=repo.commit_parent(commit)
+    if !commit
+      break
     end
   end
 end
+FileUtils.rm_r "repo"
+repo=Repo.new("repo")
+icommit=repo.commit({"hello.txt"=>"hello","hi.txt"=>"hi"},"Initial commit")
+log(repo)
+repo.branch("release")
+log(repo)
+repo.checkout("release")
+log(repo)
+rcommit=repo.commit({"hello.txt"=>"hello","hi.txt"=>"hi","version.txt"=>"1.0"},"Release commit",icommit)
+log(repo)
