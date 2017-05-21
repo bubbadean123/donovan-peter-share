@@ -115,6 +115,7 @@ class Repo
     tree=new_tree(wdir)
     commit=new_commit(tree,message,parent)
     update_ref("#{ghead}",commit)
+    update_ref("latest",commit)
     return commit
   end
   def branch(name)
@@ -140,46 +141,68 @@ class Repo
   end
 end
 def log(repo)
-  commit=repo.read_ref(repo.ghead)
-  branches=repo.branches
+  commits={}
+  i=0
+  repo.branches.each do |branch|
+  commits[branch]=repo.read_ref("heads/#{branch}")
+  i+=1
+  end
   while true do
-    print "("
     i=0
-    hprinted=false
-    branches.each do |branch|
-      if repo.read_ref("heads/#{branch}")==commit
-        if hprinted
-          print ","
-        else
-          hprinted=true
-        end
-        if "heads/#{branch}"==repo.ghead
-          print "*"
-        end
-        print branch
+    commits.each do |b,c|
+      if "heads/#{b}" == repo.ghead and c == repo.read_ref("heads/#{b}")
+        print "*"
+      end
+      print "#{b}->#{repo.commit_message(c)}"
+      if i < commits.length-1
+        print ","
+      else
+        puts
       end
       i+=1
     end
-    print ") "
-    puts repo.commit_message(commit)
-    commit=repo.commit_parent(commit)
-    if !commit
+    i=0
+    $temp=commits
+    commits.each do |b,c|
+      p=repo.commit_parent(c)
+      if p
+        $temp[b]=p
+      else
+        $temp.delete(b)
+      end
+    end
+    commits=$temp
+    if commits=={}
       break
     end
   end
 end
-
-FileUtils.rm_r "repo"
-repo=Repo.new("repo")
-icommit=repo.commit({"hello.txt"=>"hello","hi.txt"=>"hi"},"Initial commit")
-puts "Created initial commit:"
-log(repo)
-repo.branch("release")
-puts "Created branch release:"
-log(repo)
-repo.checkout("release")
-puts "Checked out branch release:"
-log(repo)
-rcommit=repo.commit({"hello.txt"=>"hello","hi.txt"=>"hi","version.txt"=>"1.0"},"Release commit",icommit)
-puts "Created release commit:"
-log(repo)
+def ltest()
+  FileUtils.rm_r "repo"
+  repo=Repo.new("repo")
+  icommit=repo.commit({"hello.txt"=>"hello","hi.txt"=>"hi"},"Initial commit")
+  puts "Created initial commit:"
+  log(repo)
+  repo.branch("release")
+  puts "Created branch release:"
+  log(repo)
+  repo.checkout("release")
+  puts "Checked out branch release:"
+  log(repo)
+  rcommit=repo.commit({"hello.txt"=>"hello","hi.txt"=>"hi","version.txt"=>"10"},"Release commit",icommit)
+  puts "Created release commit:"
+  log(repo)
+  repo.checkout("master")
+  puts "Checked out branch master:"
+  log(repo)
+  rcommit=repo.commit({"hello.txt"=>"Hello","hi.txt"=>"Hi",},"Hotfix commit",icommit)
+  puts "Created hotfix commit:"
+  log(repo)
+  repo.checkout("release")
+  puts "Checked out branch release:"
+  log(repo)
+  rcommit=repo.commit({"hello.txt"=>"hello","hi.txt"=>"hi","version.txt"=>"1.0"},"Release commit fix",icommit)
+  puts "Created release commit fix commit:"
+  log(repo)
+end
+ltest()
