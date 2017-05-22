@@ -83,5 +83,8 @@ class LoadSaveMarshal
 end
 File.open("compressed.marshal","w") do |file|
 	compressed=compress(input)
+	puts compressed.inspect
+	puts compressed.length
+	puts input.length
 	file.puts Marshal.dump(LoadSaveMarshal.new(compressed))
 end

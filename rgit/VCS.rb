@@ -1,6 +1,11 @@
 require "digest/sha1"
 require "fileutils"
 class BranchError < StandardError
+ attr_reader :branch
+  def initialize(branch)
+    @branch = branch
+    super()
+  end
 end
 class Repo
   def initialize(folder)  
