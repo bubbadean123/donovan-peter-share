@@ -653,6 +653,60 @@ class Decoder < Device
   end
 end
 
+class PEncoder < Device
+  def initialize(width, init_args={})
+    define_port("out", width)
+    @inputs = []
+    @num_inputs = width**2
+    (0...@num_inputs).each do |i|
+      @inputs << define_input("in#{i}", 1)
+    end
+    init_assign(init_args)
+  end
+
+  def on_change(data_val)
+    (0...@num_inputs).each do |i|
+      if @inputs[i].is_defined?
+        if @inputs[i].value == 1
+          out.value = i
+          return
+        end
+      else
+        out.undefine
+        return
+      end
+    end
+    out.value = 0  #default, no active inputs 
+  end
+
+  def self.test
+    puts "PEncoder test:"
+    in0 = Port.new
+    in1 = Port.new
+    in2 = Port.new
+    in3 = Port.new
+    out = Port.new(2)
+    dut = PEncoder.new(2).in0(in0)
+                         .in1(in1)
+                         .in2(in2)
+                         .in3(in3)
+                         .out(out)
+    dbg = Dbg.new({"0"=>dut.in0, "1"=>dut.in1, "2"=>dut.in2, "3"=>dut.in3, "Out"=>dut.out})
+    dbg.out                   
+    in0.value = 0
+    in1.value = 0
+    in2.value = 0
+    in3.value = 0
+    dbg.out
+    in2.value = 1
+    dbg.out
+    in1.value = 1
+    dbg.out
+    in3.value = 1
+    dbg.out
+  end
+end
+
 class Adder < Device
   def initialize(width, init_args)
     define_input("a", width)
@@ -778,3 +832,5 @@ def test()
     end
   end
 end
+
+PEncoder.test

@@ -160,17 +160,10 @@ class Net
 
   #loops until all updates complete
   def self.propagate
-    loop_check_set = Set.new
-    #keep running until nothing more to update
+    #propagate list will grow as downstream nets are changed
+    #keep updating until none are left
     while @@propagate_list.length > 0 do
       net = @@propagate_list.shift
-      #check if we have already propagated this one
-      #and we are stuck in a loop
-      if loop_check_set.include?(net)
-        #raise RuntimeError, "Signal loop detected"
-        #@@propagate_list=[]
-      end
-      loop_check_set.add(net)
       net.update
     end
   end
